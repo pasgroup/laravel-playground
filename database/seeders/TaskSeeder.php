@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Task;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class TaskSeeder extends Seeder
 {
@@ -40,7 +41,10 @@ class TaskSeeder extends Seeder
         ];
 
         foreach ($tasks as $task) {
-            Task::create($task);
+            Task::create(array_merge($task, [
+                // SeederはbootがWithoutModelEventsで無効化されているため、UUIDを手動で設定する
+                'task_uuid' => (string) Str::uuid(),
+            ]));
         }
     }
 }
