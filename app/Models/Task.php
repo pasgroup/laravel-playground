@@ -75,6 +75,7 @@ class Task extends Model
     {
         return $this->query()
             ->select('task_id', 'title', 'detail', 'due_date', 'status')
+            ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
             ->get();

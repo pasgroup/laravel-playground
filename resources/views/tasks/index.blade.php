@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>タスク一覧 - Laravel Playground</title>
-        <link href="{{ asset('css/tasks.css') }}?v={{ time() }}" rel="stylesheet">
+        <link href="{{ asset('css/tasks.css') }}?v={{ filemtime(public_path('css/tasks.css')) }}" rel="stylesheet">
     </head>
     <body class="task-page">
         <div class="task-container">
@@ -29,7 +29,7 @@
                                     <td>{{ $task->title }}</td>
                                     <td class="task-cell-muted">{{ $task->detail ?: '—' }}</td>
                                     <td>{{ $task->due_date?->format('Y-m-d') ?? '—' }}</td>
-                                    <td>{{ $task->getStatusLabelAttribute() }}</td>
+                                    <td>{{ $task->status_label }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
