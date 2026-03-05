@@ -11,6 +11,9 @@ class GetTaskOrderByDueDateTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * due_date IS NULL をロジックと判断してテストを作成した
+     */
     #[Test]
     public function returnsTasksOrderedByDueDateAscThenTaskIdAscWithNullsLast(): void
     {
@@ -78,5 +81,28 @@ class GetTaskOrderByDueDateTest extends TestCase
         $this->assertArrayHasKey('status', $first->getAttributes());
         $this->assertArrayNotHasKey('created_at', $first->getAttributes());
         $this->assertArrayNotHasKey('updated_at', $first->getAttributes());
+    }
+
+    #[Test]
+    public function excludesSoftDeletedTasksFromList(): void
+    {
+        $task_visible = Task::create([
+            'title' => '表示するタスク',
+            'due_date' => '2026-03-01',
+            'status' => Task::STATUS_NOT_STARTED,
+        ]);
+        $task_deleted = Task::create([
+            'title' => '削除したタスク',
+            'due_date' => '2026-03-02',
+            'status' => Task::STATUS_NOT_STARTED,
+        ]);
+        $task_deleted->delete();
+
+        $task = new Task();
+        $result = $task->getTaskOrderByDueDate();
+
+        $this->assertCount(1, $result);
+        $this->assertSame($task_visible->task_id, $result->first()->task_id);
+        $this->assertSame('表示するタスク', $result->first()->title);
     }
 }
