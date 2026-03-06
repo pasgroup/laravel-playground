@@ -47,6 +47,11 @@
     background-color: #1d4ed8;
 }
 
+.task-index-add-btn:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
+}
+
 .task-header-back-link {
     display: inline-block;
     padding: 0.5rem 0;
@@ -58,6 +63,12 @@
 
 .task-header-back-link:hover {
     text-decoration: underline;
+}
+
+.task-header-back-link:focus-visible {
+    text-decoration: underline;
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
 }
 
 .task-empty {
@@ -226,4 +237,9 @@
 
 .task-form-submit:hover {
     background-color: #1d4ed8;
+}
+
+.task-form-submit:focus-visible {
+    outline: 2px solid #1d4ed8;
+    outline-offset: 2px;
 }

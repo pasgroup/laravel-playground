@@ -55,6 +55,9 @@
             const form = document.querySelector('.task-form');
             const titleEl = document.getElementById('title');
             const detailEl = document.getElementById('detail');
+            if (!form || !titleEl || !detailEl) {
+                return;
+            }
 
             const updateTitleCount = function () {
                 const titleCountEl = document.getElementById('title-char-count');

@@ -45,11 +45,22 @@ class StoreTaskRequestTest extends TestCase
                     'title' => 'テストタスク',
                 ],
             ],
+            'title max length (30)' => [
+                [
+                    'title' => str_repeat('a', 30),
+                ],
+            ],
             'title, detail and due_date' => [
                 [
                     'title' => 'テストタスク',
                     'detail' => '詳細メモ',
                     'due_date' => '2026-03-10',
+                ],
+            ],
+            'detail max length (1000)' => [
+                [
+                    'title' => 'タイトル',
+                    'detail' => str_repeat('a', 1000),
                 ],
             ],
             'detail empty string' => [
