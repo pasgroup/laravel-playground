@@ -67,9 +67,30 @@ class Task extends Model
     }
 
     /**
+     * ステータスを未着手でタスクを登録する
+     *
+     * @param string $title
+     * @param string|null $detail
+     * @param string|null $due_date
+     * @return self
+     */
+    public function createStatusNotStartedTask(
+        string $title,
+        ?string $detail = null,
+        ?string $due_date = null
+    ): self {
+        return $this->create([
+            'title' => $title,
+            'detail' => $detail,
+            'due_date' => $due_date,
+            'status' => self::STATUS_NOT_STARTED,
+        ]);
+    }
+
+    /**
      * タスクを期限日順に取得
      *
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return Collection
      */
     public function getTaskOrderByDueDate(): Collection
     {
