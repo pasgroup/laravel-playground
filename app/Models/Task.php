@@ -88,6 +88,17 @@ class Task extends Model
     }
 
     /**
+     * UUIDで該当タスクを削除する
+     *
+     * @param string $task_uuid
+     * @return bool
+     */
+    public function deleteByUuid(string $task_uuid): bool
+    {
+        return $this->where('task_uuid', $task_uuid)->delete();
+    }
+
+    /**
      * タスクを期限日順に取得
      *
      * @return Collection
@@ -95,7 +106,7 @@ class Task extends Model
     public function getTaskOrderByDueDate(): Collection
     {
         return $this->query()
-            ->select('task_id', 'title', 'detail', 'due_date', 'status')
+            ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
