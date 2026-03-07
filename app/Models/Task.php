@@ -119,7 +119,7 @@ class Task extends Model
     }
 
     /**
-     * タスクを期限日順に取得
+     * タスクを期限日順に取得（完了は一覧の下に表示）
      *
      * @return Collection
      */
@@ -127,6 +127,7 @@ class Task extends Model
     {
         return $this->query()
             ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
+            ->orderByRaw("(status != '" . self::STATUS_COMPLETED . "') DESC")
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
@@ -146,5 +147,25 @@ class Task extends Model
             self::STATUS_COMPLETED => '完了',
             default => '未設定',
         };
+    }
+
+    /**
+     * 完了済みかどうか
+     *
+     * @return bool
+     */
+    public function getIsCompletedAttribute(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    /**
+     * 期限超過かどうか（未完了かつ期限日が過去）
+     *
+     * @return bool
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        return ! $this->is_completed && $this->due_date && $this->due_date->lt(today());
     }
 }
