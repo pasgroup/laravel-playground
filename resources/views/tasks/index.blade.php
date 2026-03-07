@@ -11,6 +11,9 @@
     @if (session('success'))
         <p class="task-message task-message--success">{{ session('success') }}</p>
     @endif
+    @if (session('error'))
+        <p class="task-message task-message--error">{{ session('error') }}</p>
+    @endif
 
     <h2 class="task-list-heading">登録済みタスク</h2>
     @if ($tasks->isEmpty())
@@ -24,6 +27,7 @@
                         <th>詳細</th>
                         <th>期限日</th>
                         <th>ステータス</th>
+                        <th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -33,6 +37,13 @@
                             <td class="task-cell-muted">{{ $task->detail ?: '—' }}</td>
                             <td>{{ $task->due_date?->format('Y-m-d') ?? '—' }}</td>
                             <td>{{ $task->status_label }}</td>
+                            <td>
+                                <form action="{{ route('tasks.destroy', ['task_uuid' => $task->task_uuid]) }}" method="post" class="task-form-inline" onsubmit="return confirm('このタスクを削除してもよろしいですか？');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="task-delete-btn">削除</button>
+                                </form>
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>

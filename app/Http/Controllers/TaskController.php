@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\DestroyTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
@@ -62,5 +63,22 @@ class TaskController extends Controller
         );
 
         return redirect()->route('tasks.index')->with('success', 'タスクを登録しました。');
+    }
+
+    /**
+     * タスクを削除する
+     *
+     * @param DestroyTaskRequest $request
+     * @return RedirectResponse
+     */
+    public function destroy(DestroyTaskRequest $request): RedirectResponse
+    {
+        // UUIDで該当タスクを削除
+        $deleted = $this->task->deleteByUuid($request->validated('task_uuid'));
+
+        $type = $deleted ? 'success' : 'error';
+        $message = $deleted ? 'タスクを削除しました。' : '指定されたタスクは存在しないか、既に削除されています。';
+
+        return redirect()->route('tasks.index')->with($type, $message);
     }
 }
