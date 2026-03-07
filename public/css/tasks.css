@@ -140,6 +140,19 @@
     box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 }
 
+/* JS無効時用の送信ボタン（スクリーンリーダー・キーボード用に表示） */
+.task-status-submit-btn {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
 .task-delete-btn {
     padding: 0.25rem 0.5rem;
     font-size: 0.8125rem;

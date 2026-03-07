@@ -37,6 +37,7 @@
                                         <option value="in_progress" @selected($task->status === 'in_progress')>進行中</option>
                                         <option value="completed" @selected($task->status === 'completed')>完了</option>
                                     </select>
+                                    <button type="submit" class="task-status-submit-btn" aria-label="ステータスを更新">更新</button>
                                 </form>
                             </td>
                             <td>

@@ -98,7 +98,11 @@ class Task extends Model
     {
         $updated = $this->where('task_uuid', $task_uuid)->update(['status' => $status]);
 
-        return $updated > 0;
+        if ($updated > 0) {
+            return true;
+        }
+
+        return $this->withoutTrashed()->where('task_uuid', $task_uuid)->exists();
     }
 
     /**

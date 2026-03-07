@@ -49,15 +49,62 @@ class UpdateStatusByUuidTest extends TestCase
             ->with(['status' => $status])
             ->andReturn(0);
 
+        $exists_builder = Mockery::mock();
+        $exists_builder->shouldReceive('where')
+            ->once()
+            ->with('task_uuid', $task_uuid)
+            ->andReturnSelf();
+        $exists_builder->shouldReceive('exists')
+            ->once()
+            ->andReturn(false);
+
         $task = Mockery::mock(Task::class)->makePartial();
         $task->shouldReceive('where')
             ->once()
             ->with('task_uuid', $task_uuid)
             ->andReturn($query_mock);
+        $task->shouldReceive('withoutTrashed')
+            ->once()
+            ->andReturn($exists_builder);
 
         /** @var Task $task */
         $result = $task->updateStatusByUuid($task_uuid, $status);
 
         $this->assertFalse($result);
+    }
+
+    #[Test]
+    public function itReturnsTrueWhenUpdateAffectsZeroRowsButRecordExists(): void
+    {
+        $task_uuid = '22222222-2222-2222-2222-222222222222';
+        $status = Task::STATUS_NOT_STARTED;
+        $query_mock = Mockery::mock();
+        $query_mock->shouldReceive('update')
+            ->once()
+            ->with(['status' => $status])
+            ->andReturn(0);
+
+        $exists_builder = Mockery::mock();
+        $exists_builder->shouldReceive('where')
+            ->once()
+            ->with('task_uuid', $task_uuid)
+            ->andReturnSelf();
+        $exists_builder->shouldReceive('exists')
+            ->once()
+            ->andReturn(true);
+
+        $task = Mockery::mock(Task::class)->makePartial();
+        $task->shouldReceive('where')
+            ->once()
+            ->with('task_uuid', $task_uuid)
+            ->andReturn($query_mock);
+        $task->shouldReceive('withoutTrashed')
+            ->once()
+            ->andReturn($exists_builder);
+
+        /** @var Task $task */
+        $result = $task->updateStatusByUuid($task_uuid, $status);
+
+        $this->assertTrue($result);
     }
 }

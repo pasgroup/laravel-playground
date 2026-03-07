@@ -27,7 +27,7 @@
                     if (!container) return;
                     const toast = document.createElement('div');
                     toast.className = 'task-toast task-toast--' + type;
-                    toast.setAttribute('role', 'alert');
+                    toast.setAttribute('role', type === 'success' ? 'status' : 'alert');
                     toast.textContent = message;
                     container.appendChild(toast);
                     const duration = 4000;

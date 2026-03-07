@@ -111,6 +111,13 @@ class UpdateTaskStatusRequestTest extends TestCase
                 '指定されたタスクは存在しないか、既に削除されています。',
                 null,
             ],
+            'redirects with error when task uuid format is invalid' => [
+                'invalid-task-uuid',
+                ['status' => Task::STATUS_NOT_STARTED],
+                'error',
+                'タスクの指定が不正です。',
+                null,
+            ],
             'redirects with error when task is soft deleted' => [
                 self::SOFT_DELETED_TASK_UUID,
                 ['status' => Task::STATUS_IN_PROGRESS],

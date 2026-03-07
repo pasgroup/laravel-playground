@@ -27,14 +27,17 @@ class GetTaskOrderByDueDateTest extends TestCase
         $builder->shouldReceive('orderByRaw')
             ->once()
             ->with('due_date IS NULL')
+            ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderBy')
             ->once()
             ->with('due_date', 'asc')
+            ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderBy')
             ->once()
             ->with('task_id', 'asc')
+            ->ordered()
             ->andReturnSelf();
 
         $expected = new Collection([]);
@@ -52,7 +55,7 @@ class GetTaskOrderByDueDateTest extends TestCase
     }
 
     #[Test]
-    public function itReturnsCollectionWithExpectedOrderLogic(): void
+    public function itReturnsQueryBuilderResult(): void
     {
         $task_earlier = (object) ['task_id' => 1, 'due_date' => '2026-03-01'];
         $task_later = (object) ['task_id' => 2, 'due_date' => '2026-03-10'];
@@ -64,12 +67,15 @@ class GetTaskOrderByDueDateTest extends TestCase
             ->andReturnSelf();
         $builder->shouldReceive('orderByRaw')
             ->with('due_date IS NULL')
+            ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderBy')
             ->with('due_date', 'asc')
+            ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderBy')
             ->with('task_id', 'asc')
+            ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('get')
             ->andReturn($collection);
@@ -80,7 +86,6 @@ class GetTaskOrderByDueDateTest extends TestCase
 
         $result = $task->getTaskOrderByDueDate();
 
-        $this->assertCount(3, $result);
-        $this->assertSame($task_earlier, $result->get(0));
+        $this->assertSame($collection, $result);
     }
 }

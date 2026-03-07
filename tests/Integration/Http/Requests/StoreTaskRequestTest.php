@@ -49,6 +49,12 @@ class StoreTaskRequestTest extends TestCase
             $response->assertSessionHas($expected_session_key, $expected_session_message);
         }
 
+        if ($expected_error_attribute === null && $expected_error_message === null) {
+            $this->assertDatabaseHas('tasks', [
+                'title' => $post_data['title'],
+            ]);
+        }
+
         if ($expected_error_attribute !== null && $expected_error_message !== null) {
             $response->assertSessionHasErrors($expected_error_attribute);
 
