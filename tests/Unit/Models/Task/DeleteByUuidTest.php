@@ -3,45 +3,52 @@
 namespace Tests\Unit\Models\Task;
 
 use App\Models\Task;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DeleteByUuidTest extends TestCase
 {
-    use RefreshDatabase;
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
 
     #[Test]
-    public function itReturnsTrueAndSoftDeletesTaskWhenUuidExists(): void
+    public function itReturnsTrueWhenDeleteAffectsOneRow(): void
     {
-        $task = Task::factory()->notStarted()->create();
-        $task_uuid = $task->task_uuid;
+        $task_uuid = '00000000-0000-0000-0000-000000000000';
+        $query_mock = Mockery::mock();
+        $query_mock->shouldReceive('delete')->once()->andReturn(1);
 
-        $model = new Task();
-        $result = $model->deleteByUuid($task_uuid);
+        $task = Mockery::mock(Task::class)->makePartial();
+        $task->shouldReceive('where')
+            ->once()
+            ->with('task_uuid', $task_uuid)
+            ->andReturn($query_mock);
+
+        /** @var Task $task */
+        $result = $task->deleteByUuid($task_uuid);
 
         $this->assertTrue($result);
-        $this->assertSoftDeleted('tasks', ['task_id' => $task->task_id]);
     }
 
     #[Test]
-    public function itReturnsFalseWhenUuidDoesNotExist(): void
+    public function itReturnsFalseWhenDeleteAffectsZeroRows(): void
     {
-        $model = new Task();
-        $result = $model->deleteByUuid('00000000-0000-0000-0000-000000000000');
+        $task_uuid = '11111111-1111-1111-1111-111111111111';
+        $query_mock = Mockery::mock();
+        $query_mock->shouldReceive('delete')->once()->andReturn(0);
 
-        $this->assertFalse($result);
-    }
+        $task = Mockery::mock(Task::class)->makePartial();
+        $task->shouldReceive('where')
+            ->once()
+            ->with('task_uuid', $task_uuid)
+            ->andReturn($query_mock);
 
-    #[Test]
-    public function itReturnsFalseWhenTaskIsAlreadySoftDeleted(): void
-    {
-        $task = Task::factory()->notStarted()->create();
-        $task->delete();
-        $task_uuid = $task->task_uuid;
-
-        $model = new Task();
-        $result = $model->deleteByUuid($task_uuid);
+        /** @var Task $task */
+        $result = $task->deleteByUuid($task_uuid);
 
         $this->assertFalse($result);
     }

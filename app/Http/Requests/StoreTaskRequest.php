@@ -23,7 +23,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function rules(): array
     {
-        $title_max  = config('app.task_title_max');
+        $title_max = config('app.task_title_max');
         $detail_max = config('app.task_detail_max');
 
         return [
@@ -40,7 +40,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function messages(): array
     {
-        $title_max  = config('app.task_title_max');
+        $title_max = config('app.task_title_max');
         $detail_max = config('app.task_detail_max');
 
         return [
