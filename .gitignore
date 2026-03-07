@@ -3,8 +3,11 @@
 .env
 .env.backup
 .env.production
+.env.dusk.local
 .phpactor.json
 .phpunit.result.cache
+/coverage
+coverage.xml
 /.fleet
 /.idea
 /.nova
