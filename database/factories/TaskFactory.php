@@ -26,7 +26,7 @@ class TaskFactory extends Factory
             'task_uuid' => (string) Str::uuid(),
             'title' => 'テストタイトル',
             'detail' => 'テスト詳細',
-            'due_date' => '2026-03-10',
+            'due_date' => now()->addDays(3)->toDateString(),
             'status' => Task::STATUS_NOT_STARTED,
         ];
     }

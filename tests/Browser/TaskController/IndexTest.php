@@ -88,8 +88,13 @@ class IndexTest extends DuskTestCase
             $this->assertCount(3, $titles);
 
             $order = array_map(fn ($el) => $el->getAttribute('dusk'), $titles);
+            $overdue_dusk = 'index-task-title-' . $overdue->task_id;
             $not_completed_dusk = 'index-task-title-' . $not_completed->task_id;
             $completed_dusk = 'index-task-title-' . $completed->task_id;
+            $this->assertLessThan(
+                array_search($not_completed_dusk, $order, true),
+                array_search($overdue_dusk, $order, true),
+            );
             $this->assertLessThan(
                 array_search($completed_dusk, $order, true),
                 array_search($not_completed_dusk, $order, true),

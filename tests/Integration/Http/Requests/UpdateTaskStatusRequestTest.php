@@ -104,6 +104,13 @@ class UpdateTaskStatusRequestTest extends TestCase
                 'ステータスを指定してください。',
                 null,
             ],
+            'redirects with error when status is not string' => [
+                self::TASK_UUID,
+                ['status' => [123]],
+                'error',
+                'ステータスの形式が不正です。',
+                null,
+            ],
             'redirects with error when task uuid does not exist' => [
                 self::NOT_FOUND_UUID,
                 ['status' => Task::STATUS_NOT_STARTED],

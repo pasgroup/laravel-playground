@@ -33,7 +33,7 @@
                 </div>
                 <textarea name="detail" id="detail" rows="4" class="task-form-input task-form-textarea @error('detail') task-form-input--error @enderror" maxlength="{{ $task_detail_max }}">{{ old('detail') }}</textarea>
                 @error('detail')
-                    <p class="task-form-error">{{ $message }}</p>
+                    <p class="task-form-error" dusk="create-detail-error">{{ $message }}</p>
                 @enderror
             </div>
             <div class="task-form-row">

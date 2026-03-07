@@ -30,7 +30,7 @@ class DestroyTest extends DuskTestCase
                 ->assertSeeIn('@index-task-title-' . $task_for_not_delete->task_id, $task_for_not_delete->title)
                 ->assertSeeIn('@index-task-title-' . $task_for_delete->task_id, $task_for_delete->title)
                 ->press('@index-delete-btn-' . $task_for_delete->task_id);
-            $browser->driver->switchTo()->alert()->accept();
+            $browser->acceptDialog();
 
             $browser->waitFor('@toast-message', 3)
                 ->assertSeeIn('@toast-message', 'タスクを削除しました。')

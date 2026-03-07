@@ -45,7 +45,9 @@ class StoreTaskRequest extends FormRequest
 
         return [
             'title.required' => 'タイトルを入力してください。',
+            'title.string' => 'タイトルの形式が不正です。',
             'title.max' => 'タイトルは' . $title_max . '文字以内で入力してください。',
+            'detail.string' => '詳細の形式が不正です。',
             'detail.max' => '詳細は' . $detail_max . '文字以内で入力してください。',
             'due_date.date' => '期限日は有効な日付で入力してください。',
         ];

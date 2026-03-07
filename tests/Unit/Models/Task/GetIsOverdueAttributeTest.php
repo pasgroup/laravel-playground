@@ -29,10 +29,10 @@ class GetIsOverdueAttributeTest extends TestCase
      */
     public static function overdueProvider(): array
     {
-        $now = now();
-        $today = $now->copy()->format('Y-m-d');
-        $yesterday = $now->copy()->subDay()->format('Y-m-d');
-        $tomorrow = $now->copy()->addDay()->format('Y-m-d');
+        // 固定の相対日付を使用してフレーキーテストを回避
+        $today = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+        $tomorrow = date('Y-m-d', strtotime('+1 day'));
 
         return [
             'not_started with past due_date returns true' => [

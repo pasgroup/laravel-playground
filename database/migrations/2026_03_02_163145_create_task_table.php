@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('status')->default('not_started')->comment('ステータス（not_started/in_progress/completed）');
             $table->timestamps();
             $table->softDeletes();
+            $table->index(['status', 'due_date']);
         });
     }
 

@@ -96,7 +96,7 @@ class TaskSeeder extends Seeder
         Task::factory()->notStarted()->create([
             'title' => '今日が期限のタスク',
             'detail' => '期限日が今日のタスクです。',
-            'due_date' => $base_date->copy()->startOfDay(),
+            'due_date' => $base_date->copy(),
         ]);
     }
 }

@@ -70,6 +70,7 @@ class UpdateTaskStatusRequest extends FormRequest
             'task_uuid.uuid' => 'タスクの指定が不正です。',
             'task_uuid.exists' => '指定されたタスクは存在しないか、既に削除されています。',
             'status.required' => 'ステータスを指定してください。',
+            'status.string' => 'ステータスの形式が不正です。',
             'status.in' => 'ステータスは未着手・進行中・完了のいずれかを指定してください。',
         ];
     }

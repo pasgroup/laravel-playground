@@ -3,6 +3,11 @@
 @section('title', 'タスク一覧')
 
 @section('content')
+    @php
+        $status_not_started = \App\Models\Task::STATUS_NOT_STARTED;
+        $status_in_progress = \App\Models\Task::STATUS_IN_PROGRESS;
+        $status_completed = \App\Models\Task::STATUS_COMPLETED;
+    @endphp
     <header class="task-header">
         <h1 class="task-title" dusk="index-heading">タスク一覧</h1>
         <a href="{{ route('tasks.create') }}" class="task-index-add-btn" dusk="index-create-link">新規タスク登録</a>
@@ -46,9 +51,9 @@
                                 <form action="{{ route('tasks.status.update', ['task_uuid' => $task->task_uuid]) }}" method="post" class="task-form-inline task-status-form">
                                     @csrf
                                     <select name="status" class="task-status-select" aria-label="ステータス" onchange="this.form.submit()" dusk="index-status-select-{{ $task->task_id }}">
-                                        <option value="not_started" @selected($task->status === 'not_started')>未着手</option>
-                                        <option value="in_progress" @selected($task->status === 'in_progress')>進行中</option>
-                                        <option value="completed" @selected($task->status === 'completed')>完了</option>
+                                        <option value="{{ $status_not_started }}" @selected($task->status === $status_not_started)>未着手</option>
+                                        <option value="{{ $status_in_progress }}" @selected($task->status === $status_in_progress)>進行中</option>
+                                        <option value="{{ $status_completed }}" @selected($task->status === $status_completed)>完了</option>
                                     </select>
                                     <button type="submit" class="task-status-submit-btn" aria-label="ステータスを更新">更新</button>
                                 </form>

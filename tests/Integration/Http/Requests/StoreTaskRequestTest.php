@@ -56,13 +56,9 @@ class StoreTaskRequestTest extends TestCase
         }
 
         if ($expected_error_attribute !== null && $expected_error_message !== null) {
-            $response->assertSessionHasErrors($expected_error_attribute);
-
-            $errors = app('session.store')->get('errors');
-            $this->assertSame(
-                $expected_error_message,
-                $errors->getBag('default')->first($expected_error_attribute)
-            );
+            $response->assertSessionHasErrors([
+                $expected_error_attribute => $expected_error_message,
+            ]);
         }
     }
 
@@ -107,6 +103,25 @@ class StoreTaskRequestTest extends TestCase
                 null,
                 'title',
                 'タイトルを入力してください。',
+            ],
+            'fails when title is not string' => [
+                ['title' => [123]],
+                'tasks.create',
+                null,
+                null,
+                'title',
+                'タイトルの形式が不正です。',
+            ],
+            'fails when detail is not string' => [
+                [
+                    'title' => 'タイトル',
+                    'detail' => [456],
+                ],
+                'tasks.create',
+                null,
+                null,
+                'detail',
+                '詳細の形式が不正です。',
             ],
             'fails when title exceeds 30 characters' => [
                 ['title' => str_repeat('a', 31)],

@@ -39,7 +39,7 @@ class StoreTest extends DuskTestCase
     {
         $this->browse(function (Browser $browser) {
             $browser->visit(route('tasks.create'))
-                ->type('@create-title-input', '')
+                ->clear('@create-title-input')
                 ->press('@create-submit-btn')
                 ->waitFor('@create-title-error', 3)
                 ->assertRouteIs('tasks.create')
