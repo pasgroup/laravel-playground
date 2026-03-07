@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\DestroyTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskStatusRequest;
 use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -78,6 +79,25 @@ class TaskController extends Controller
 
         $type = $deleted ? 'success' : 'error';
         $message = $deleted ? 'タスクを削除しました。' : '指定されたタスクは存在しないか、既に削除されています。';
+
+        return redirect()->route('tasks.index')->with($type, $message);
+    }
+
+    /**
+     * タスクのステータスを更新する
+     *
+     * @param UpdateTaskStatusRequest $request
+     * @return RedirectResponse
+     */
+    public function updateStatus(UpdateTaskStatusRequest $request): RedirectResponse
+    {
+        $updated = $this->task->updateStatusByUuid(
+            $request->validated('task_uuid'),
+            $request->validated('status')
+        );
+
+        $type = $updated ? 'success' : 'error';
+        $message = $updated ? 'タスクのステータスを更新しました。' : '指定されたタスクは存在しないか、既に削除されています。';
 
         return redirect()->route('tasks.index')->with($type, $message);
     }

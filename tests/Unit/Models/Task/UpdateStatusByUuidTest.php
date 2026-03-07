@@ -7,7 +7,7 @@ use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class DeleteByUuidTest extends TestCase
+class UpdateStatusByUuidTest extends TestCase
 {
     protected function tearDown(): void
     {
@@ -16,11 +16,15 @@ class DeleteByUuidTest extends TestCase
     }
 
     #[Test]
-    public function itReturnsTrueWhenDeleteAffectsOneRow(): void
+    public function itReturnsTrueWhenUpdateAffectsOneRow(): void
     {
         $task_uuid = '00000000-0000-0000-0000-000000000000';
+        $status = Task::STATUS_IN_PROGRESS;
         $query_mock = Mockery::mock();
-        $query_mock->shouldReceive('delete')->once()->andReturn(1);
+        $query_mock->shouldReceive('update')
+            ->once()
+            ->with(['status' => $status])
+            ->andReturn(1);
 
         $task = Mockery::mock(Task::class)->makePartial();
         $task->shouldReceive('where')
@@ -29,17 +33,21 @@ class DeleteByUuidTest extends TestCase
             ->andReturn($query_mock);
 
         /** @var Task $task */
-        $result = $task->deleteByUuid($task_uuid);
+        $result = $task->updateStatusByUuid($task_uuid, $status);
 
         $this->assertTrue($result);
     }
 
     #[Test]
-    public function itReturnsFalseWhenDeleteAffectsZeroRows(): void
+    public function itReturnsFalseWhenUpdateAffectsZeroRows(): void
     {
         $task_uuid = '11111111-1111-1111-1111-111111111111';
+        $status = Task::STATUS_COMPLETED;
         $query_mock = Mockery::mock();
-        $query_mock->shouldReceive('delete')->once()->andReturn(0);
+        $query_mock->shouldReceive('update')
+            ->once()
+            ->with(['status' => $status])
+            ->andReturn(0);
 
         $task = Mockery::mock(Task::class)->makePartial();
         $task->shouldReceive('where')
@@ -48,7 +56,7 @@ class DeleteByUuidTest extends TestCase
             ->andReturn($query_mock);
 
         /** @var Task $task */
-        $result = $task->deleteByUuid($task_uuid);
+        $result = $task->updateStatusByUuid($task_uuid, $status);
 
         $this->assertFalse($result);
     }

@@ -37,6 +37,9 @@ jobs:
           cp .env.example .env
           php artisan key:generate --no-interaction
 
+      - name: Check code formatting
+        run: ./vendor/bin/pint --test
+
       - name: Run Tests with Coverage
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
 

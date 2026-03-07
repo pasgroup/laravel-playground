@@ -48,7 +48,7 @@ class Task extends Model
      */
     public const STATUS_NOT_STARTED = 'not_started';
     public const STATUS_IN_PROGRESS = 'in_progress';
-    public const STATUS_COMPLETED   = 'completed';
+    public const STATUS_COMPLETED = 'completed';
 
     /**
      * UUIDを自動生成
@@ -85,6 +85,20 @@ class Task extends Model
             'due_date' => $due_date,
             'status' => self::STATUS_NOT_STARTED,
         ]);
+    }
+
+    /**
+     * UUIDで該当タスクのステータスを更新する
+     *
+     * @param string $task_uuid
+     * @param string $status
+     * @return bool
+     */
+    public function updateStatusByUuid(string $task_uuid, string $status): bool
+    {
+        $updated = $this->where('task_uuid', $task_uuid)->update(['status' => $status]);
+
+        return $updated > 0;
     }
 
     /**
@@ -125,7 +139,7 @@ class Task extends Model
         return match ($this->status) {
             self::STATUS_NOT_STARTED => '未着手',
             self::STATUS_IN_PROGRESS => '進行中',
-            self::STATUS_COMPLETED   => '完了',
+            self::STATUS_COMPLETED => '完了',
             default => '未設定',
         };
     }

@@ -120,6 +120,26 @@
     display: inline;
 }
 
+.task-status-form {
+    display: block;
+}
+
+.task-status-select {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    background-color: #fff;
+    min-width: 6rem;
+    cursor: pointer;
+}
+
+.task-status-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
 .task-delete-btn {
     padding: 0.25rem 0.5rem;
     font-size: 0.8125rem;
@@ -140,23 +160,69 @@
     outline-offset: 2px;
 }
 
-/* メッセージ */
-.task-message {
-    padding: 0.75rem 1rem;
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
+/* トースト */
+.task-toast-container {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: 24rem;
+    pointer-events: none;
 }
 
-.task-message--success {
+.task-toast-container .task-toast {
+    pointer-events: auto;
+}
+
+.task-toast {
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    animation: task-toast-in 0.3s ease-out;
+}
+
+.task-toast--hide {
+    animation: task-toast-out 0.3s ease-in forwards;
+}
+
+.task-toast--success {
     background-color: #d1fae5;
     color: #065f46;
     border: 1px solid #a7f3d0;
 }
 
-.task-message--error {
+.task-toast--error {
     background-color: #fee2e2;
     color: #991b1b;
     border: 1px solid #fecaca;
+}
+
+@keyframes task-toast-in {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes task-toast-out {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(100%);
+    }
 }
 
 /* タスク登録フォーム */
