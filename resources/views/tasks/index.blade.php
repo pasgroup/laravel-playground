@@ -34,7 +34,13 @@
                             'task-row-first-completed' => $is_first_completed,
                         ])>
                             <td dusk="index-task-title-{{ $task->task_id }}">{{ $task->title }}</td>
-                            <td class="task-cell-muted" dusk="index-task-detail-{{ $task->task_id }}">{{ $task->detail !== null && $task->detail !== '' ? $task->detail : '—' }}</td>
+                            <td class="task-cell-muted" dusk="index-task-detail-{{ $task->task_id }}">
+                                @if ($task->detail !== null && $task->detail !== '')
+                                    {!! nl2br(e($task->detail)) !!}
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td class="task-cell-due-date" dusk="index-task-due-date-{{ $task->task_id }}">{{ $task->due_date?->format('Y-m-d') ?? '—' }}</td>
                             <td>
                                 <form action="{{ route('tasks.status.update', ['task_uuid' => $task->task_uuid]) }}" method="post" class="task-form-inline task-status-form">
