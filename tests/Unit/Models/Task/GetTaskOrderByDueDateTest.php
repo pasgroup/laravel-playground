@@ -26,6 +26,11 @@ class GetTaskOrderByDueDateTest extends TestCase
             ->andReturnSelf();
         $builder->shouldReceive('orderByRaw')
             ->once()
+            ->with("(status != 'completed') DESC")
+            ->ordered()
+            ->andReturnSelf();
+        $builder->shouldReceive('orderByRaw')
+            ->once()
             ->with('due_date IS NULL')
             ->ordered()
             ->andReturnSelf();
@@ -64,6 +69,10 @@ class GetTaskOrderByDueDateTest extends TestCase
 
         $builder = Mockery::mock();
         $builder->shouldReceive('select')
+            ->andReturnSelf();
+        $builder->shouldReceive('orderByRaw')
+            ->with("(status != 'completed') DESC")
+            ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderByRaw')
             ->with('due_date IS NULL')

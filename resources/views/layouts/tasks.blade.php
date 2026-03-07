@@ -8,7 +8,7 @@
         <link href="{{ asset('css/tasks.css') }}?v={{ filemtime(public_path('css/tasks.css')) }}" rel="stylesheet">
     </head>
     <body class="task-page">
-        <div id="task-toast-container" class="task-toast-container" aria-live="polite" aria-atomic="true"></div>
+        <div id="task-toast-container" class="task-toast-container" aria-live="polite" aria-atomic="true" dusk="toast-container"></div>
         <div class="task-container">
             @yield('content')
         </div>
@@ -28,6 +28,7 @@
                     const toast = document.createElement('div');
                     toast.className = 'task-toast task-toast--' + type;
                     toast.setAttribute('role', type === 'success' ? 'status' : 'alert');
+                    toast.setAttribute('dusk', 'toast-message');
                     toast.textContent = message;
                     container.appendChild(toast);
                     const duration = 4000;

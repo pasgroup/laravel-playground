@@ -119,7 +119,7 @@ class Task extends Model
     }
 
     /**
-     * タスクを期限日順に取得
+     * タスクを期限日順に取得（完了は一覧の下に表示）
      *
      * @return Collection
      */
@@ -127,6 +127,7 @@ class Task extends Model
     {
         return $this->query()
             ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
+            ->orderByRaw("(status != 'completed') DESC")
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')

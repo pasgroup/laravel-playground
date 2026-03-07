@@ -4,8 +4,8 @@
 
 @section('content')
     <header class="task-header">
-        <h1 class="task-title">タスク追加</h1>
-        <a href="{{ route('tasks.index') }}" class="task-header-back-link">一覧に戻る</a>
+        <h1 class="task-title" dusk="create-heading">タスク追加</h1>
+        <a href="{{ route('tasks.index') }}" class="task-header-back-link" dusk="create-back-link">一覧に戻る</a>
     </header>
 
     @php
@@ -14,16 +14,16 @@
     @endphp
     <section class="task-form-section" aria-labelledby="task-form-heading">
         <h2 id="task-form-heading" class="task-form-heading">新規タスク登録</h2>
-        <form action="{{ route('tasks.store') }}" method="post" class="task-form" data-task-title-max="{{ $task_title_max }}" data-task-detail-max="{{ $task_detail_max }}">
+        <form action="{{ route('tasks.store') }}" method="post" class="task-form" data-task-title-max="{{ $task_title_max }}" data-task-detail-max="{{ $task_detail_max }}" dusk="create-form">
             @csrf
             <div class="task-form-row">
                 <div class="task-form-label-row">
                     <label for="title" class="task-form-label">タイトル <span class="task-form-required">必須</span></label>
                     <span id="title-char-count" class="task-form-char-count" aria-live="polite">0 / {{ $task_title_max }}</span>
                 </div>
-                <input type="text" name="title" id="title" value="{{ old('title') }}" class="task-form-input @error('title') task-form-input--error @enderror" maxlength="{{ $task_title_max }}">
+                <input type="text" name="title" id="title" value="{{ old('title') }}" class="task-form-input @error('title') task-form-input--error @enderror" maxlength="{{ $task_title_max }}" dusk="create-title-input">
                 @error('title')
-                    <p class="task-form-error">{{ $message }}</p>
+                    <p class="task-form-error" dusk="create-title-error">{{ $message }}</p>
                 @enderror
             </div>
             <div class="task-form-row">
@@ -44,7 +44,7 @@
                 @enderror
             </div>
             <div class="task-form-row task-form-row--submit">
-                <button type="submit" class="task-form-submit">登録する</button>
+                <button type="submit" class="task-form-submit" dusk="create-submit-btn">登録する</button>
             </div>
         </form>
     </section>
