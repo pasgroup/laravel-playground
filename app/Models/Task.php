@@ -127,7 +127,7 @@ class Task extends Model
     {
         return $this->query()
             ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
-            ->orderByRaw("(status != 'completed') DESC")
+            ->orderByRaw("(status != '" . self::STATUS_COMPLETED . "') DESC")
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
