@@ -76,8 +76,13 @@ class IndexTest extends DuskTestCase
             $browser->assertSeeIn('@index-task-title-' . $overdue->task_id, $overdue->title);
             $browser->assertSeeIn('@index-task-title-' . $completed->task_id, $completed->title);
 
+            $browser->assertPresent('@index-task-row-' . $overdue->task_id);
             $overdue_row = $browser->element('@index-task-row-' . $overdue->task_id);
             $this->assertStringContainsString('task-row-overdue', $overdue_row->getAttribute('class') ?? '');
+
+            $browser->assertPresent('@index-task-row-' . $completed->task_id);
+            $completed_row = $browser->element('@index-task-row-' . $completed->task_id);
+            $this->assertStringNotContainsString('task-row-overdue', $completed_row->getAttribute('class') ?? '');
 
             $titles = $browser->elements('[dusk^="index-task-title-"]');
             $this->assertCount(3, $titles);

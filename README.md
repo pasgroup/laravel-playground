@@ -52,7 +52,7 @@ herd php artisan migrate
     - コードレビューの自動化
     - サンプル（[タスクのステータス変更操作と一覧への反映を実装する #19](https://github.com/pasgroup/laravel-playground/pull/22)）
       - 重要な指摘は該当のコードへのコメント（修正案まで出してくれる）
-      - 細かなアドバイスについては、コメントのNitpick commentsを開くと見れる
+      - 細かなアドバイスについては、コメントのNitpick commentsを開くと見られる
   - [Codecov](https://app.codecov.io/gh/pasgroup/laravel-playground/)
     - カバレッジ表示
     - Github actions でテストを実行して反映させている

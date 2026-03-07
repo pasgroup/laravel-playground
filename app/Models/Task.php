@@ -148,4 +148,24 @@ class Task extends Model
             default => '未設定',
         };
     }
+
+    /**
+     * 完了済みかどうか
+     *
+     * @return bool
+     */
+    public function getIsCompletedAttribute(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    /**
+     * 期限超過かどうか（未完了かつ期限日が過去）
+     *
+     * @return bool
+     */
+    public function getIsOverdueAttribute(): bool
+    {
+        return ! $this->is_completed && $this->due_date && $this->due_date->lt(today());
+    }
 }

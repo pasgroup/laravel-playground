@@ -24,18 +24,13 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @php $prev_task = null; @endphp
                     @foreach ($tasks as $task)
                         @php
-                            $is_completed = $task->status === \App\Models\Task::STATUS_COMPLETED;
-
-                            $is_overdue = !$is_completed && $task->due_date && $task->due_date->lt(today());
-
-                            $prev_task = $tasks->get($loop->index - 1);
-
-                            $is_first_completed = $loop->index > 0 && $is_completed && ($prev_task?->status !== \App\Models\Task::STATUS_COMPLETED);
+                            $is_first_completed = $prev_task !== null && $task->is_completed && ! $prev_task->is_completed;
                         @endphp
                         <tr dusk="index-task-row-{{ $task->task_id }}" @class([
-                            'task-row-overdue' => $is_overdue,
+                            'task-row-overdue' => $task->is_overdue,
                             'task-row-first-completed' => $is_first_completed,
                         ])>
                             <td dusk="index-task-title-{{ $task->task_id }}">{{ $task->title }}</td>
@@ -60,6 +55,7 @@
                                 </form>
                             </td>
                         </tr>
+                        @php $prev_task = $task; @endphp
                     @endforeach
                 </tbody>
             </table>
