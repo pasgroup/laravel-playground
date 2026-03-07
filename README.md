@@ -16,6 +16,7 @@
 ### セットアップ
 
 ```bash
+herd composer install
 cp .env.example .env
 herd php artisan key:generate
 herd php artisan migrate
