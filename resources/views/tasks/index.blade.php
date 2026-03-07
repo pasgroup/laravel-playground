@@ -40,6 +40,7 @@
                             <td>
                                 <form action="{{ route('tasks.destroy', ['task_uuid' => $task->task_uuid]) }}" method="post" class="task-form-inline" onsubmit="return confirm('このタスクを削除してもよろしいですか？');">
                                     @csrf
+                                    @method('DELETE')
                                     <button type="submit" class="task-delete-btn">削除</button>
                                 </form>
                             </td>

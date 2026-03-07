@@ -95,7 +95,9 @@ class Task extends Model
      */
     public function deleteByUuid(string $task_uuid): bool
     {
-        return $this->where('task_uuid', $task_uuid)->delete();
+        $deleted = $this->where('task_uuid', $task_uuid)->delete();
+
+        return $deleted > 0;
     }
 
     /**

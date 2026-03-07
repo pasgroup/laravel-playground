@@ -73,9 +73,12 @@ class TaskController extends Controller
      */
     public function destroy(DestroyTaskRequest $request): RedirectResponse
     {
-        // タスクを削除
-        $this->task->deleteByUuid($request->validated('task_uuid'));
+        // UUIDで該当タスクを削除
+        $deleted = $this->task->deleteByUuid($request->validated('task_uuid'));
 
-        return redirect()->route('tasks.index')->with('success', 'タスクを削除しました。');
+        $type = $deleted ? 'success' : 'error';
+        $message = $deleted ? 'タスクを削除しました。' : '指定されたタスクは存在しないか、既に削除されています。';
+
+        return redirect()->route('tasks.index')->with($type, $message);
     }
 }
