@@ -40,7 +40,7 @@
                 <label for="due_date" class="task-form-label">期限日</label>
                 <input type="date" name="due_date" id="due_date" value="{{ old('due_date') }}" class="task-form-input @error('due_date') task-form-input--error @enderror">
                 @error('due_date')
-                    <p class="task-form-error">{{ $message }}</p>
+                    <p class="task-form-error" dusk="create-due-date-error">{{ $message }}</p>
                 @enderror
             </div>
             <div class="task-form-row task-form-row--submit">

@@ -34,7 +34,7 @@ class UpdateTaskStatusRequestTest extends TestCase
      * マージ・リダイレクト・セッションを含むPOSTの結合テスト
      *
      * @param string $task_uuid
-     * @param array<string, string> $post_data
+     * @param array<string, mixed> $post_data
      * @param string $expected_session_key
      * @param string $expected_session_message
      * @param string|null $expected_status 更新成功時のみDBのstatusを検証する場合に指定
@@ -64,7 +64,7 @@ class UpdateTaskStatusRequestTest extends TestCase
     }
 
     /**
-     * @return array<string, array{string, array<string, string>, string, string, string|null}>
+     * @return array<string, array{string, array<string, mixed>, string, string, string|null}>
      */
     public static function updateStatusScenariosProvider(): array
     {
