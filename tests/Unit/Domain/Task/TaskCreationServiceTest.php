@@ -56,4 +56,30 @@ class TaskCreationServiceTest extends TestCase
             'not-a-date'
         );
     }
+
+    #[Test]
+    public function itThrowsInvalidArgumentExceptionWhenDueDateIsEmptyString(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $task_creation_service = new TaskCreationService();
+
+        $task_creation_service->createForNewTask(
+            'service title',
+            null,
+            ''
+        );
+    }
+
+    #[Test]
+    public function itThrowsInvalidArgumentExceptionWhenDueDateIsOverflowDate(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $task_creation_service = new TaskCreationService();
+
+        $task_creation_service->createForNewTask(
+            'service title',
+            null,
+            '2026-13-99'
+        );
+    }
 }

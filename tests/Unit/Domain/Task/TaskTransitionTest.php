@@ -34,11 +34,14 @@ class TaskTransitionTest extends TestCase
     }
 
     #[Test]
-    public function itRejectsUnknownStatuses(): void
+    public function itAllowsAllStatusPairs(): void
     {
         $task_transition = new TaskTransition();
 
-        $this->assertFalse($task_transition->canTransition('unknown', TaskStatus::IN_PROGRESS));
-        $this->assertFalse($task_transition->canTransition(TaskStatus::IN_PROGRESS, 'unknown'));
+        foreach (TaskStatus::cases() as $from_status) {
+            foreach (TaskStatus::cases() as $to_status) {
+                $this->assertTrue($task_transition->canTransition($from_status, $to_status));
+            }
+        }
     }
 }

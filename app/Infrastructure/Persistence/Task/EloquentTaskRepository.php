@@ -84,7 +84,7 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
     private function toEntity(Task $task): TaskEntity
     {
         return new TaskEntity(
-            task_id: (int) $task->task_id,
+            task_id: $task->task_id === null ? null : (int) $task->task_id,
             task_uuid: (string) $task->task_uuid,
             title: (string) $task->title,
             detail: $task->detail !== null ? (string) $task->detail : null,

@@ -5,7 +5,6 @@ namespace App\Domain\Task\Service;
 use App\Domain\Task\Entity\TaskEntity;
 use App\Domain\Task\ValueObject\TaskStatus;
 use Carbon\CarbonImmutable;
-use Carbon\Exceptions\InvalidFormatException;
 use InvalidArgumentException;
 
 final class TaskCreationService
@@ -24,10 +23,11 @@ final class TaskCreationService
 
     private function parseDueDate(string $due_date): CarbonImmutable
     {
-        try {
-            return CarbonImmutable::parse($due_date);
-        } catch (InvalidFormatException $exception) {
-            throw new InvalidArgumentException('Invalid due_date format: ' . $due_date, 0, $exception);
+        $parsed = CarbonImmutable::createFromFormat('Y-m-d', $due_date);
+        if ($parsed === false || $parsed->format('Y-m-d') !== $due_date) {
+            throw new InvalidArgumentException('Invalid due_date format: ' . $due_date);
         }
+
+        return $parsed;
     }
 }
