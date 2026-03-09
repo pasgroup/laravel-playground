@@ -27,10 +27,10 @@ class ListTasksUseCaseTest extends TestCase
 
         $use_case = app(ListTasksUseCase::class);
         $output = $use_case->handle();
-        $tasks = collect($output->tasks);
+        $tasks = $output->tasks;
 
         $this->assertCount(3, $tasks);
-        $this->assertSame($first_task->task_id, $tasks->first()->task_id);
-        $this->assertSame($second_task->task_id, $tasks->get(1)->task_id);
+        $this->assertSame($first_task->task_id, $tasks[0]->task_id);
+        $this->assertSame($second_task->task_id, $tasks[1]->task_id);
     }
 }

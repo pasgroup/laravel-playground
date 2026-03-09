@@ -51,8 +51,11 @@ sequenceDiagram
     LU->>R: getTaskOrderByDueDate()
     R->>ER: 実装呼び出し
     ER->>T: クエリ実行
-    T-->>LU: Collection<Task>
+    T-->>ER: Eloquent records
+    ER-->>R: list<TaskListItemDto>
+    R-->>LU: list<TaskListItemDto>
     LU-->>C: TaskListOutput
+    C->>C: collect(output.tasks)
     C->>V: tasks, success_message を渡す
     V-->>U: HTML
 ```
@@ -79,7 +82,9 @@ sequenceDiagram
     CU->>Repo: createTask(...)
     Repo->>ER: 実装呼び出し
     ER->>T: create(...)
-    T-->>CU: created task_id
+    T-->>ER: created task_id
+    ER-->>Repo: task_id
+    Repo-->>CU: task_id
     CU-->>C: TaskCommandOutput(success, task_id)
     C-->>U: redirect(tasks.index) + flash success
 ```
@@ -107,11 +112,17 @@ sequenceDiagram
     UU->>Repo: findTaskStatusByUuid(task_uuid)
     Repo->>ER: 実装呼び出し
     ER->>T: status取得
+    T-->>ER: current_status|null
+    ER-->>Repo: current_status|null
+    Repo-->>UU: current_status|null
     UU->>TT: canTransition(current_status, next_status)
     alt 遷移可
         UU->>Repo: updateTaskStatusByUuidAndCurrentStatus(...)
         Repo->>ER: 実装呼び出し
         ER->>T: 条件付きUPDATE
+        T-->>ER: affected_rows
+        ER-->>Repo: affected_rows
+        Repo-->>UU: affected_rows
         UU-->>C: TaskCommandOutput(success)
         C-->>U: redirect + flash success
     else タスクなし/遷移不可
@@ -142,6 +153,9 @@ sequenceDiagram
     DU->>Repo: deleteTaskByUuid(task_uuid)
     Repo->>ER: 実装呼び出し
     ER->>T: DELETE(soft delete)
+    T-->>ER: deleted_rows
+    ER-->>Repo: deleted_rows>0
+    Repo-->>DU: bool
     alt 削除成功
         DU-->>C: TaskCommandOutput(success)
         C-->>U: redirect + flash success

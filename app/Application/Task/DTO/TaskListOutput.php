@@ -4,8 +4,11 @@ namespace App\Application\Task\DTO;
 
 final class TaskListOutput
 {
+    /**
+     * @param list<TaskListItemDto> $tasks
+     */
     public function __construct(
-        public iterable $tasks
+        public array $tasks
     ) {
     }
 }

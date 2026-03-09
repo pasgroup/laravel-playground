@@ -2,6 +2,7 @@
 
 namespace App\Infrastructure\Persistence\Task;
 
+use App\Application\Task\DTO\TaskListItemDto;
 use App\Application\Task\Repository\TaskRepositoryInterface;
 use App\Domain\Task\TaskStatus;
 use App\Models\Task;
@@ -29,16 +30,32 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
         return (int) $task->task_id;
     }
 
-    public function getTaskOrderByDueDate(): iterable
+    /**
+     * @return list<TaskListItemDto>
+     */
+    public function getTaskOrderByDueDate(): array
     {
-        return $this->task->newQuery()
+        $tasks = $this->task->newQuery()
             ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
             ->orderByRaw("(status != '" . TaskStatus::COMPLETED->value . "') DESC")
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
-            ->get()
-            ->all();
+            ->get();
+
+        return $tasks->map(
+            fn (Task $task): TaskListItemDto => new TaskListItemDto(
+                (int) $task->task_id,
+                (string) $task->task_uuid,
+                (string) $task->title,
+                $task->detail !== null ? (string) $task->detail : null,
+                $task->due_date,
+                (string) $task->status,
+                (string) $task->status_label,
+                (bool) $task->is_completed,
+                (bool) $task->is_overdue
+            )
+        )->all();
     }
 
     public function findTaskStatusByUuid(string $task_uuid): ?string

@@ -2,6 +2,8 @@
 
 namespace App\Application\Task\Repository;
 
+use App\Application\Task\DTO\TaskListItemDto;
+
 interface TaskRepositoryInterface
 {
     public function createTask(
@@ -11,7 +13,10 @@ interface TaskRepositoryInterface
         string $status
     ): int;
 
-    public function getTaskOrderByDueDate(): iterable;
+    /**
+     * @return list<TaskListItemDto>
+     */
+    public function getTaskOrderByDueDate(): array;
 
     public function findTaskStatusByUuid(string $task_uuid): ?string;
 
