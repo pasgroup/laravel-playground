@@ -24,7 +24,10 @@ final class UpdateTaskStatusUseCase
      */
     public function handle(UpdateTaskStatusInput $input): TaskCommandOutput
     {
-        $next_status = TaskStatus::from($input->status);
+        $next_status = TaskStatus::tryFrom($input->status);
+        if ($next_status === null) {
+            throw new InvalidTaskStatusTransitionException();
+        }
         $task_query = $this->task->newQuery();
         $current_task = $task_query
             ->select('task_id', 'status')

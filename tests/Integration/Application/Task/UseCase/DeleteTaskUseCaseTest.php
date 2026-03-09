@@ -20,11 +20,13 @@ class DeleteTaskUseCaseTest extends TestCase
         $task = Task::factory()->notStarted()->create();
         $use_case = new DeleteTaskUseCase(new Task());
 
-        $use_case->handle(new DeleteTaskInput($task->task_uuid));
+        $output = $use_case->handle(new DeleteTaskInput($task->task_uuid));
 
         $this->assertSoftDeleted('tasks', [
             'task_uuid' => $task->task_uuid,
         ]);
+        $this->assertSame('success', $output->flash_type);
+        $this->assertSame('タスクを削除しました。', $output->flash_message);
     }
 
     #[Test]

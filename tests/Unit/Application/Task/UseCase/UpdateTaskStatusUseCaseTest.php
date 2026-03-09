@@ -103,6 +103,18 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function itThrowsWhenInputStatusIsInvalid(): void
+    {
+        $this->expectException(InvalidTaskStatusTransitionException::class);
+        $task_uuid = '11111111-1111-1111-1111-111111111111';
+
+        $use_case = new UpdateTaskStatusUseCase(new Task(), new TaskTransition());
+        $use_case->handle(
+            new UpdateTaskStatusInput($task_uuid, 'invalid_status')
+        );
+    }
+
+    #[Test]
     public function itThrowsWhenStoredStatusIsUnknown(): void
     {
         $this->expectException(InvalidTaskStatusTransitionException::class);
