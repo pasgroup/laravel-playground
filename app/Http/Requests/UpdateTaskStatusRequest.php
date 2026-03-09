@@ -44,7 +44,6 @@ class UpdateTaskStatusRequest extends FormRequest
             'task_uuid' => [
                 'required',
                 'uuid',
-                Rule::exists('tasks', 'task_uuid')->withoutTrashed(),
             ],
             'status' => [
                 'required',
@@ -88,7 +87,6 @@ class UpdateTaskStatusRequest extends FormRequest
         return [
             'task_uuid.required' => 'タスクを指定してください。',
             'task_uuid.uuid' => 'タスクの指定が不正です。',
-            'task_uuid.exists' => '指定されたタスクは存在しないか、既に削除されています。',
             'status.required' => 'ステータスを指定してください。',
             'status.string' => 'ステータスの形式が不正です。',
             'status.in' => 'ステータスは' . implode('・', $this->statusLabels()) . 'のいずれかを指定してください。',

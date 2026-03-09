@@ -6,7 +6,6 @@ use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\Validation\Rule;
 
 class DestroyTaskRequest extends FormRequest
 {
@@ -43,7 +42,6 @@ class DestroyTaskRequest extends FormRequest
             'task_uuid' => [
                 'required',
                 'uuid',
-                Rule::exists('tasks', 'task_uuid')->withoutTrashed(),
             ],
         ];
     }
@@ -58,7 +56,6 @@ class DestroyTaskRequest extends FormRequest
         return [
             'task_uuid.required' => 'タスクを指定してください。',
             'task_uuid.uuid' => 'タスクの指定が不正です。',
-            'task_uuid.exists' => '指定されたタスクは存在しないか、既に削除されています。',
         ];
     }
 
