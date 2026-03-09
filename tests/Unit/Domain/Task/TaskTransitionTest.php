@@ -24,6 +24,16 @@ class TaskTransitionTest extends TestCase
     }
 
     #[Test]
+    public function itAllowsBackwardOrSkippedTransitions(): void
+    {
+        $task_transition = new TaskTransition();
+
+        $this->assertTrue($task_transition->canTransition(TaskStatus::NOT_STARTED, TaskStatus::COMPLETED));
+        $this->assertTrue($task_transition->canTransition(TaskStatus::IN_PROGRESS, TaskStatus::NOT_STARTED));
+        $this->assertTrue($task_transition->canTransition(TaskStatus::COMPLETED, TaskStatus::IN_PROGRESS));
+    }
+
+    #[Test]
     public function itRejectsUnknownStatuses(): void
     {
         $task_transition = new TaskTransition();

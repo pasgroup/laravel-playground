@@ -21,6 +21,8 @@ flowchart LR
     Repo["Infrastructure\n(EloquentTaskRepository)"]
     Model["Eloquent Model\n(App\\Models\\Task)"]
     Presenter["Presenter/Formatter\n(TaskIndexPresenter/TaskIndexItemFormatter)"]
+    ViewModel["ViewModel\n(TaskIndexViewModel)"]
+    View["View\n(resources/views/tasks/index.blade.php)"]
     Output["Output DTO\n(TaskListOutput/TaskCommandOutput)"]
     Response["Redirect / View"]
 
@@ -29,7 +31,13 @@ flowchart LR
     UseCase --> Domain
     UseCase --> Port
     Port -. resolve .-> DI --> Repo --> Model
-    UseCase --> Output --> Controller --> Presenter --> Response --> Client
+    UseCase --> Output
+    Output --> Controller
+    Controller <--> Presenter
+    Presenter --> ViewModel
+    Controller --> View
+    ViewModel --> View
+    View --> Response --> Client
 ```
 
 ---
@@ -57,6 +65,7 @@ sequenceDiagram
     ER-->>Repo: list<TaskEntity>
     Repo-->>LU: list<TaskEntity>
     LU-->>C: TaskListOutput
+    C->>C: success = session('success')\nerror = session('error')
     C->>P: present(output, success, error)
     P->>F: toViewModel(task, previous_task)
     F-->>P: TaskIndexItemViewModel

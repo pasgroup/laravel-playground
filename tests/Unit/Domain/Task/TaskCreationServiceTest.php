@@ -4,6 +4,7 @@ namespace Tests\Unit\Domain\Task;
 
 use App\Domain\Task\Service\TaskCreationService;
 use App\Domain\Task\ValueObject\TaskStatus;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -41,5 +42,18 @@ class TaskCreationServiceTest extends TestCase
 
         $this->assertNull($task_entity->detail);
         $this->assertNull($task_entity->due_date);
+    }
+
+    #[Test]
+    public function itThrowsInvalidArgumentExceptionWhenDueDateFormatIsInvalid(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $task_creation_service = new TaskCreationService();
+
+        $task_creation_service->createForNewTask(
+            'service title',
+            null,
+            'not-a-date'
+        );
     }
 }
