@@ -41,7 +41,7 @@
 
 - ユースケースクラス（例: CreateTaskUseCase, UpdateTaskStatusUseCase, DeleteTaskUseCase, ListTasksUseCase）
 - 入力DTO（Use Case への引数をまとめたオブジェクト）
-- UseCase はドメインエンティティを返却し、Interface 層で必要に応じて DTO/ViewModel に変換する（ドメイン中心アプローチ）。変換は Interface 層で行い、UseCase はドメインの型のみを返す。
+- UseCase の公開シグネチャ（戻り値）は **ドメインエンティティではなく専用の出力 DTO/OutputModel** とする。UseCase 内でドメイン操作後にドメイン→出力 DTO へ変換するマッパー（例: DomainToOutputMapper）を用い、Interface 層（Controller/Presenter/ViewModel）はこの出力 DTO を受け取り、表示用にさらに変換するかそのまま返却する。これによりドメインの内部構造が Interface 層に露出しない。
 - Application 層に定義したリポジトリ**インターフェース**（Port）の利用
 
 **含めないもの**
@@ -136,16 +136,17 @@
 
 | 種類               | 命名例                          |
 |--------------------|---------------------------------|
-| ドメインエンティティ | `Task`（Domain 用。Eloquent と区別する場合は `TaskEntity` 等） |
+| ドメインエンティティ | `TaskEntity`（Domain 用。Eloquent Model との混同を避けるため、ドメインエンティティは必ず `〜Entity` サフィックスを付ける） |
 | 値オブジェクト       | `TaskStatus`, `DueDate` 等      |
 | ユースケース         | `CreateTaskUseCase`, `ListTasksUseCase` |
-| リポジトリ Port     | `TaskRepositoryInterface` または `TaskRepository`（interface） |
-| リポジトリ Adapter  | `EloquentTaskRepository`        |
+| リポジトリ Port     | `TaskRepositoryInterface`（Application 層に interface を配置） |
+| リポジトリ Adapter  | `EloquentTaskRepository`（Infrastructure の実装） |
 | Controller         | `TaskController`（既存のまま）  |
 | FormRequest        | `StoreTaskRequest` 等（既存のまま） |
 
+- ドメインエンティティは **必ず `〜Entity` サフィックス** を付ける（例: `TaskEntity`）。理由: Eloquent Model（例: `App\Models\Task`）と名前が衝突しないようにするため。Domain 層では `Task` ではなく `TaskEntity` を一貫して用いる。
 - UseCase は「動詞 + 対象 + UseCase」とする
-- Port は「〜Repository」または「〜RepositoryInterface」とし、Application 側に interface を置く
+- Port は「〜RepositoryInterface」とし、Application 側に interface を置く（実装は「Eloquent〜Repository」等の Adapter 名で Infrastructure に配置）
 - Adapter は「実装手段 + Port名」とする（例: EloquentTaskRepository）
 
 ### 3.3 ファイル配置例（Task 機能）
@@ -154,7 +155,7 @@
 app/
 ├── Domain/
 │   └── Task/
-│       ├── Task.php              # エンティティ（または TaskEntity.php）
+│       ├── TaskEntity.php        # ドメインエンティティ
 │       ├── TaskStatus.php        # 値オブジェクト or 定数クラス
 │       └── ...
 ├── Application/
@@ -163,7 +164,7 @@ app/
 │       ├── ListTasksUseCase.php
 │       ├── UpdateTaskStatusUseCase.php
 │       ├── DeleteTaskUseCase.php
-│       └── TaskRepository.php   # interface (Port)
+│       └── TaskRepositoryInterface.php   # interface (Port)
 ├── Infrastructure/
 │   └── Persistence/
 │       └── Task/
@@ -190,12 +191,12 @@ app/
    - 既存 `App\Models\Task` の定数（STATUS_*）は Domain に移し、Model は Domain を参照するか、一時的に定数を残して後で削除
 
 2. **Application の Port と UseCase の追加**
-   - `TaskRepository` インターフェースを Application に定義
+   - `TaskRepositoryInterface` を Application に定義
    - Create / List / UpdateStatus / Delete の各 UseCase を追加
    - UseCase は Domain のエンティティと Port にのみ依存するようにする
 
 3. **Infrastructure の実装**
-   - `TaskRepository` を実装する `EloquentTaskRepository` を追加
+   - `TaskRepositoryInterface` を実装する `EloquentTaskRepository` を追加
    - 既存の `App\Models\Task` をリポジトリ内で利用する形にし、必要なら `EloquentTaskModel` として Infrastructure に移動・リネーム
 
 4. **Interface の差し替え**
@@ -249,7 +250,7 @@ app/
 Task機能が Clean Architecture へ移行完了したとみなす基準を以下に定義する。
 
 - Controller が Eloquent Model を直接呼び出さず、UseCase 経由で処理を実行している
-- UseCase が Repository の interface（Port）にのみ依存している
+- UseCase が Repository の interface（Port: TaskRepositoryInterface）にのみ依存している
 - Repository 実装（Eloquent）は Infrastructure に閉じている
 - Domain 層にフレームワーク依存（Illuminate系）が混入していない
 - 既存の主要機能（作成/一覧/状態更新/削除）が退行なく動作し、既存テストまたは同等テストで担保されている
