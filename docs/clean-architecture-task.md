@@ -260,3 +260,4 @@ Task機能が Clean Architecture へ移行完了したとみなす基準を以�
 ## Related
 
 - Issue: [Clean Architecture導入方針の策定 #27](https://github.com/pasgroup/laravel-playground/issues/27)
+- Doc: [Task機能 データフロー図（UseCase版）](./task-usecase-data-flow.md)

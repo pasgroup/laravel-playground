@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Task\TaskStatus;
-use App\Domain\Task\TaskTransition;
+use App\Application\Task\DTO\CreateTaskInput;
+use App\Application\Task\DTO\DeleteTaskInput;
+use App\Application\Task\DTO\TaskCommandOutput;
+use App\Application\Task\DTO\UpdateTaskStatusInput;
+use App\Application\Task\Exceptions\TaskApplicationException;
+use App\Application\Task\UseCase\CreateTaskUseCase;
+use App\Application\Task\UseCase\DeleteTaskUseCase;
+use App\Application\Task\UseCase\ListTasksUseCase;
+use App\Application\Task\UseCase\UpdateTaskStatusUseCase;
 use App\Http\Requests\DestroyTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
-use App\Models\Task;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -18,8 +24,10 @@ class TaskController extends Controller
      * コンストラクタ
      */
     public function __construct(
-        protected Task $task,
-        protected TaskTransition $task_transition
+        protected ListTasksUseCase $list_tasks_use_case,
+        protected CreateTaskUseCase $create_task_use_case,
+        protected DeleteTaskUseCase $delete_task_use_case,
+        protected UpdateTaskStatusUseCase $update_task_status_use_case
     ) {
     }
 
@@ -31,11 +39,10 @@ class TaskController extends Controller
      */
     public function index(Request $request): View
     {
-        // タスクを期限日順に取得
-        $tasks = $this->task->getTaskOrderByDueDate();
+        $output = $this->list_tasks_use_case->handle();
 
         return view('tasks.index', [
-            'tasks' => $tasks,
+            'tasks' => $output->tasks,
             'success_message' => $request->session()->get('success'),
         ]);
     }
@@ -60,14 +67,15 @@ class TaskController extends Controller
     {
         $validated = $request->validated();
 
-        $this->task->newQuery()->create([
-            'title' => $validated['title'],
-            'detail' => $validated['detail'] ?? null,
-            'due_date' => $validated['due_date'] ?? null,
-            'status' => TaskStatus::NOT_STARTED->value,
-        ]);
+        $output = $this->create_task_use_case->handle(
+            new CreateTaskInput(
+                $validated['title'],
+                $validated['detail'] ?? null,
+                $validated['due_date'] ?? null
+            )
+        );
 
-        return redirect()->route('tasks.index')->with('success', 'タスクを登録しました。');
+        return $this->redirectWithOutput($output);
     }
 
     /**
@@ -78,13 +86,15 @@ class TaskController extends Controller
      */
     public function destroy(DestroyTaskRequest $request): RedirectResponse
     {
-        // UUIDで該当タスクを削除
-        $deleted = $this->task->deleteByUuid($request->validated('task_uuid'));
+        try {
+            $output = $this->delete_task_use_case->handle(
+                new DeleteTaskInput($request->validated('task_uuid'))
+            );
 
-        $type = $deleted ? 'success' : 'error';
-        $message = $deleted ? 'タスクを削除しました。' : '指定されたタスクは存在しないか、既に削除されています。';
-
-        return redirect()->route('tasks.index')->with($type, $message);
+            return $this->redirectWithOutput($output);
+        } catch (TaskApplicationException $exception) {
+            return redirect()->route('tasks.index')->with('error', $exception->getMessage());
+        }
     }
 
     /**
@@ -95,27 +105,25 @@ class TaskController extends Controller
      */
     public function updateStatus(UpdateTaskStatusRequest $request): RedirectResponse
     {
-        $task_uuid = $request->validated('task_uuid');
-        $next_status = TaskStatus::from((string) $request->validated('status'));
-        $current_task = $this->task->newQuery()
-            ->select('task_id', 'status')
-            ->where('task_uuid', $task_uuid)
-            ->first();
+        try {
+            $output = $this->update_task_status_use_case->handle(
+                new UpdateTaskStatusInput(
+                    $request->validated('task_uuid'),
+                    $request->validated('status')
+                )
+            );
 
-        $current_status = $current_task !== null ? TaskStatus::tryFrom((string) $current_task->status) : null;
-
-        if ($current_status === null || ! $this->task_transition->canTransition($current_status, $next_status)) {
-            return redirect()->route('tasks.index')->with('error', '許可されていないステータス遷移です。');
+            return $this->redirectWithOutput($output);
+        } catch (TaskApplicationException $exception) {
+            return redirect()->route('tasks.index')->with('error', $exception->getMessage());
         }
+    }
 
-        $updated = $this->task->updateStatusByUuid(
-            $task_uuid,
-            $next_status->value
+    private function redirectWithOutput(TaskCommandOutput $output): RedirectResponse
+    {
+        return redirect()->route('tasks.index')->with(
+            $output->flash_type,
+            $output->flash_message
         );
-
-        $type = $updated ? 'success' : 'error';
-        $message = $updated ? 'タスクのステータスを更新しました。' : '指定されたタスクは存在しないか、既に削除されています。';
-
-        return redirect()->route('tasks.index')->with($type, $message);
     }
 }

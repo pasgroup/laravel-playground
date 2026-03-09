@@ -13,6 +13,24 @@
         <a href="{{ route('tasks.create') }}" class="task-index-add-btn" dusk="index-create-link">新規タスク登録</a>
     </header>
 
+    @if (session('success'))
+        <p
+            class="task-flash task-flash-success"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            dusk="index-flash-success"
+        >{{ session('success') }}</p>
+    @endif
+    @if (session('error'))
+        <p
+            class="task-flash task-flash-error"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            dusk="index-flash-error"
+        >{{ session('error') }}</p>
+    @endif
     <h2 class="task-list-heading" dusk="index-list-heading">登録済みタスク</h2>
     @if ($tasks->isEmpty())
         <p class="task-empty" dusk="index-empty-message">登録されたタスクはありません。</p>
