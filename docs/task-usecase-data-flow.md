@@ -16,6 +16,9 @@ flowchart LR
     Input["Input DTO\n(Create/Update/Delete)"]
     UseCase["UseCase\n(Create/List/Update/Delete)"]
     Domain["Domain Rule\n(TaskStatus/TaskTransition/TaskDeadline)"]
+    Port["Repository Interface\n(TaskRepositoryInterface)"]
+    DI["Service Container\n(AppServiceProvider bind)"]
+    Repo["Infrastructure\n(EloquentTaskRepository)"]
     Model["Eloquent Model\n(App\\Models\\Task)"]
     Output["Output DTO\n(TaskListOutput/TaskCommandOutput)"]
     Response["Redirect / View"]
@@ -23,7 +26,8 @@ flowchart LR
     Client --> Route --> Request --> Controller
     Controller --> Input --> UseCase
     UseCase --> Domain
-    UseCase --> Model
+    UseCase --> Port
+    Port -. resolve .-> DI --> Repo --> Model
     UseCase --> Output
     Output --> Controller --> Response --> Client
 ```
@@ -37,14 +41,21 @@ sequenceDiagram
     actor U as User
     participant C as TaskController@index
     participant LU as ListTasksUseCase
+    participant R as TaskRepositoryInterface
+    participant ER as EloquentTaskRepository
     participant T as Task(Model)
     participant V as tasks.index(view)
 
     U->>C: GET /
     C->>LU: handle()
-    LU->>T: getTaskOrderByDueDate()
-    T-->>LU: Collection<Task>
+    LU->>R: getTaskOrderByDueDate()
+    R->>ER: 実装呼び出し
+    ER->>T: クエリ実行
+    T-->>ER: Eloquent records
+    ER-->>R: list<TaskListItemDto>
+    R-->>LU: list<TaskListItemDto>
     LU-->>C: TaskListOutput
+    C->>C: collect(output.tasks)
     C->>V: tasks, success_message を渡す
     V-->>U: HTML
 ```
@@ -56,18 +67,25 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant R as StoreTaskRequest
+    participant Req as StoreTaskRequest
     participant C as TaskController@store
     participant D as CreateTaskInput
     participant CU as CreateTaskUseCase
+    participant Repo as TaskRepositoryInterface
+    participant ER as EloquentTaskRepository
     participant T as Task(Model)
 
-    U->>R: POST /tasks
-    R-->>C: validated(title, detail, due_date)
+    U->>Req: POST /tasks
+    Req-->>C: validated(title, detail, due_date)
     C->>D: Input DTO生成
     C->>CU: handle(input)
-    CU->>T: create(title, detail, due_date, status=not_started)
-    CU-->>C: TaskCommandOutput(success)
+    CU->>Repo: createTask(...)
+    Repo->>ER: 実装呼び出し
+    ER->>T: create(...)
+    T-->>ER: created task_id
+    ER-->>Repo: task_id
+    Repo-->>CU: task_id
+    CU-->>C: TaskCommandOutput(success, task_id)
     C-->>U: redirect(tasks.index) + flash success
 ```
 
@@ -78,21 +96,33 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant R as UpdateTaskStatusRequest
+    participant Req as UpdateTaskStatusRequest
     participant C as TaskController@updateStatus
     participant D as UpdateTaskStatusInput
     participant UU as UpdateTaskStatusUseCase
     participant TT as TaskTransition(Domain)
+    participant Repo as TaskRepositoryInterface
+    participant ER as EloquentTaskRepository
     participant T as Task(Model)
 
-    U->>R: POST /tasks/{task_uuid}/status
-    R-->>C: validated(task_uuid, status)
+    U->>Req: POST /tasks/{task_uuid}/status
+    Req-->>C: validated(task_uuid, status)
     C->>D: Input DTO生成
     C->>UU: handle(input)
-    UU->>T: 現在タスク取得(task_uuid)
+    UU->>Repo: findTaskStatusByUuid(task_uuid)
+    Repo->>ER: 実装呼び出し
+    ER->>T: status取得
+    T-->>ER: current_status|null
+    ER-->>Repo: current_status|null
+    Repo-->>UU: current_status|null
     UU->>TT: canTransition(current_status, next_status)
     alt 遷移可
-        UU->>T: updateStatusByUuid(task_uuid, status)
+        UU->>Repo: updateTaskStatusByUuidAndCurrentStatus(...)
+        Repo->>ER: 実装呼び出し
+        ER->>T: 条件付きUPDATE
+        T-->>ER: affected_rows
+        ER-->>Repo: affected_rows
+        Repo-->>UU: affected_rows
         UU-->>C: TaskCommandOutput(success)
         C-->>U: redirect + flash success
     else タスクなし/遷移不可
@@ -108,17 +138,24 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant R as DestroyTaskRequest
+    participant Req as DestroyTaskRequest
     participant C as TaskController@destroy
     participant D as DeleteTaskInput
     participant DU as DeleteTaskUseCase
+    participant Repo as TaskRepositoryInterface
+    participant ER as EloquentTaskRepository
     participant T as Task(Model)
 
-    U->>R: DELETE /tasks/{task_uuid}
-    R-->>C: validated(task_uuid)
+    U->>Req: DELETE /tasks/{task_uuid}
+    Req-->>C: validated(task_uuid)
     C->>D: Input DTO生成
     C->>DU: handle(input)
-    DU->>T: deleteByUuid(task_uuid)
+    DU->>Repo: deleteTaskByUuid(task_uuid)
+    Repo->>ER: 実装呼び出し
+    ER->>T: DELETE(soft delete)
+    T-->>ER: deleted_rows
+    ER-->>Repo: deleted_rows>0
+    Repo-->>DU: bool
     alt 削除成功
         DU-->>C: TaskCommandOutput(success)
         C-->>U: redirect + flash success

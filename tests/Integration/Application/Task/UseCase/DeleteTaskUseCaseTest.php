@@ -18,7 +18,7 @@ class DeleteTaskUseCaseTest extends TestCase
     public function itDeletesTask(): void
     {
         $task = Task::factory()->notStarted()->create();
-        $use_case = new DeleteTaskUseCase(new Task());
+        $use_case = app(DeleteTaskUseCase::class);
 
         $output = $use_case->handle(new DeleteTaskInput($task->task_uuid));
 
@@ -34,7 +34,7 @@ class DeleteTaskUseCaseTest extends TestCase
     {
         $this->expectException(TaskNotFoundException::class);
 
-        $use_case = new DeleteTaskUseCase(new Task());
+        $use_case = app(DeleteTaskUseCase::class);
         $use_case->handle(
             new DeleteTaskInput('00000000-0000-0000-0000-000000000000')
         );

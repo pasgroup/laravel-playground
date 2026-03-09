@@ -25,11 +25,12 @@ class ListTasksUseCaseTest extends TestCase
             'due_date' => '2026-03-01',
         ]);
 
-        $use_case = new ListTasksUseCase(new Task());
+        $use_case = app(ListTasksUseCase::class);
         $output = $use_case->handle();
+        $tasks = $output->tasks;
 
-        $this->assertCount(3, $output->tasks);
-        $this->assertSame($first_task->task_id, $output->tasks->first()->task_id);
-        $this->assertSame($second_task->task_id, $output->tasks->get(1)->task_id);
+        $this->assertCount(3, $tasks);
+        $this->assertSame($first_task->task_id, $tasks[0]->task_id);
+        $this->assertSame($second_task->task_id, $tasks[1]->task_id);
     }
 }

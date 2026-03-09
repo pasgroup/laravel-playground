@@ -5,10 +5,10 @@ namespace Tests\Unit\Application\Task\UseCase;
 use App\Application\Task\DTO\UpdateTaskStatusInput;
 use App\Application\Task\Exceptions\InvalidTaskStatusTransitionException;
 use App\Application\Task\Exceptions\TaskNotFoundException;
+use App\Application\Task\Repository\TaskRepositoryInterface;
 use App\Application\Task\UseCase\UpdateTaskStatusUseCase;
 use App\Domain\Task\TaskStatus;
 use App\Domain\Task\TaskTransition;
-use App\Models\Task;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -25,42 +25,22 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     public function itUpdatesStatusAndReturnsSuccessMessage(): void
     {
         $task_uuid = '11111111-1111-1111-1111-111111111111';
-        $current_task = (object) ['task_id' => 1, 'status' => TaskStatus::NOT_STARTED->value];
-        $read_builder = Mockery::mock();
-        $read_builder->shouldReceive('select')
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('findTaskStatusByUuid')
             ->once()
-            ->with('task_id', 'status')
-            ->andReturnSelf();
-        $read_builder->shouldReceive('where')
+            ->with($task_uuid)
+            ->andReturn(TaskStatus::NOT_STARTED->value);
+        $task_repository->shouldReceive('updateTaskStatusByUuidAndCurrentStatus')
             ->once()
-            ->with('task_uuid', $task_uuid)
-            ->andReturnSelf();
-        $read_builder->shouldReceive('first')
-            ->once()
-            ->andReturn($current_task);
-        $update_builder = Mockery::mock();
-        $update_builder->shouldReceive('where')
-            ->once()
-            ->with('task_uuid', $task_uuid)
-            ->andReturnSelf();
-        $update_builder->shouldReceive('where')
-            ->once()
-            ->with('status', TaskStatus::NOT_STARTED->value)
-            ->andReturnSelf();
-        $update_builder->shouldReceive('update')
-            ->once()
-            ->with([
-                'status' => TaskStatus::IN_PROGRESS->value,
-            ])
+            ->with(
+                $task_uuid,
+                TaskStatus::NOT_STARTED->value,
+                TaskStatus::IN_PROGRESS->value
+            )
             ->andReturn(1);
 
-        /** @var Task $task */
-        $task = Mockery::mock(Task::class)->makePartial();
-        $task->shouldReceive('newQuery')
-            ->twice()
-            ->andReturn($read_builder, $update_builder);
-
-        $use_case = new UpdateTaskStatusUseCase($task, new TaskTransition());
+        $use_case = new UpdateTaskStatusUseCase($task_repository, new TaskTransition());
 
         $output = $use_case->handle(
             new UpdateTaskStatusInput($task_uuid, TaskStatus::IN_PROGRESS->value)
@@ -75,25 +55,14 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     {
         $this->expectException(TaskNotFoundException::class);
         $task_uuid = '00000000-0000-0000-0000-000000000000';
-        $builder = Mockery::mock();
-        $builder->shouldReceive('select')
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('findTaskStatusByUuid')
             ->once()
-            ->andReturnSelf();
-        $builder->shouldReceive('where')
-            ->once()
-            ->with('task_uuid', $task_uuid)
-            ->andReturnSelf();
-        $builder->shouldReceive('first')
-            ->once()
+            ->with($task_uuid)
             ->andReturn(null);
 
-        /** @var Task $task */
-        $task = Mockery::mock(Task::class)->makePartial();
-        $task->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($builder);
-
-        $use_case = new UpdateTaskStatusUseCase($task, new TaskTransition());
+        $use_case = new UpdateTaskStatusUseCase($task_repository, new TaskTransition());
         $use_case->handle(
             new UpdateTaskStatusInput(
                 $task_uuid,
@@ -106,27 +75,14 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     public function itReturnsSuccessWhenCurrentAndNextStatusAreSame(): void
     {
         $task_uuid = '11111111-1111-1111-1111-111111111111';
-        $current_task = (object) ['task_id' => 1, 'status' => TaskStatus::IN_PROGRESS->value];
-        $read_builder = Mockery::mock();
-        $read_builder->shouldReceive('select')
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('findTaskStatusByUuid')
             ->once()
-            ->with('task_id', 'status')
-            ->andReturnSelf();
-        $read_builder->shouldReceive('where')
-            ->once()
-            ->with('task_uuid', $task_uuid)
-            ->andReturnSelf();
-        $read_builder->shouldReceive('first')
-            ->once()
-            ->andReturn($current_task);
+            ->with($task_uuid)
+            ->andReturn(TaskStatus::IN_PROGRESS->value);
 
-        /** @var Task $task */
-        $task = Mockery::mock(Task::class)->makePartial();
-        $task->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($read_builder);
-
-        $use_case = new UpdateTaskStatusUseCase($task, new TaskTransition());
+        $use_case = new UpdateTaskStatusUseCase($task_repository, new TaskTransition());
 
         $output = $use_case->handle(
             new UpdateTaskStatusInput($task_uuid, TaskStatus::IN_PROGRESS->value)
@@ -141,8 +97,10 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     {
         $this->expectException(InvalidTaskStatusTransitionException::class);
         $task_uuid = '11111111-1111-1111-1111-111111111111';
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
 
-        $use_case = new UpdateTaskStatusUseCase(new Task(), new TaskTransition());
+        $use_case = new UpdateTaskStatusUseCase($task_repository, new TaskTransition());
         $use_case->handle(
             new UpdateTaskStatusInput($task_uuid, 'invalid_status')
         );
@@ -153,26 +111,14 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     {
         $this->expectException(InvalidTaskStatusTransitionException::class);
         $task_uuid = '11111111-1111-1111-1111-111111111111';
-        $current_task = (object) ['task_id' => 1, 'status' => 'invalid_status'];
-        $read_builder = Mockery::mock();
-        $read_builder->shouldReceive('select')
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('findTaskStatusByUuid')
             ->once()
-            ->andReturnSelf();
-        $read_builder->shouldReceive('where')
-            ->once()
-            ->with('task_uuid', $task_uuid)
-            ->andReturnSelf();
-        $read_builder->shouldReceive('first')
-            ->once()
-            ->andReturn($current_task);
+            ->with($task_uuid)
+            ->andReturn('invalid_status');
 
-        /** @var Task $task */
-        $task = Mockery::mock(Task::class)->makePartial();
-        $task->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($read_builder);
-
-        $use_case = new UpdateTaskStatusUseCase($task, new TaskTransition());
+        $use_case = new UpdateTaskStatusUseCase($task_repository, new TaskTransition());
         $use_case->handle(
             new UpdateTaskStatusInput($task_uuid, TaskStatus::IN_PROGRESS->value)
         );

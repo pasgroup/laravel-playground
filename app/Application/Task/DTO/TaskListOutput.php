@@ -2,12 +2,13 @@
 
 namespace App\Application\Task\DTO;
 
-use Illuminate\Database\Eloquent\Collection;
-
 final class TaskListOutput
 {
+    /**
+     * @param list<TaskListItemDto> $tasks
+     */
     public function __construct(
-        public Collection $tasks
+        public array $tasks
     ) {
     }
 }
