@@ -64,20 +64,20 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant R as StoreTaskRequest
+    participant Req as StoreTaskRequest
     participant C as TaskController@store
     participant D as CreateTaskInput
     participant CU as CreateTaskUseCase
-    participant R as TaskRepositoryInterface
+    participant Repo as TaskRepositoryInterface
     participant ER as EloquentTaskRepository
     participant T as Task(Model)
 
-    U->>R: POST /tasks
-    R-->>C: validated(title, detail, due_date)
+    U->>Req: POST /tasks
+    Req-->>C: validated(title, detail, due_date)
     C->>D: Input DTO生成
     C->>CU: handle(input)
-    CU->>R: createTask(...)
-    R->>ER: 実装呼び出し
+    CU->>Repo: createTask(...)
+    Repo->>ER: 実装呼び出し
     ER->>T: create(...)
     T-->>CU: created task_id
     CU-->>C: TaskCommandOutput(success, task_id)
@@ -91,26 +91,26 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant R as UpdateTaskStatusRequest
+    participant Req as UpdateTaskStatusRequest
     participant C as TaskController@updateStatus
     participant D as UpdateTaskStatusInput
     participant UU as UpdateTaskStatusUseCase
     participant TT as TaskTransition(Domain)
-    participant R as TaskRepositoryInterface
+    participant Repo as TaskRepositoryInterface
     participant ER as EloquentTaskRepository
     participant T as Task(Model)
 
-    U->>R: POST /tasks/{task_uuid}/status
-    R-->>C: validated(task_uuid, status)
+    U->>Req: POST /tasks/{task_uuid}/status
+    Req-->>C: validated(task_uuid, status)
     C->>D: Input DTO生成
     C->>UU: handle(input)
-    UU->>R: findTaskStatusByUuid(task_uuid)
-    R->>ER: 実装呼び出し
+    UU->>Repo: findTaskStatusByUuid(task_uuid)
+    Repo->>ER: 実装呼び出し
     ER->>T: status取得
     UU->>TT: canTransition(current_status, next_status)
     alt 遷移可
-        UU->>R: updateTaskStatusByUuidAndCurrentStatus(...)
-        R->>ER: 実装呼び出し
+        UU->>Repo: updateTaskStatusByUuidAndCurrentStatus(...)
+        Repo->>ER: 実装呼び出し
         ER->>T: 条件付きUPDATE
         UU-->>C: TaskCommandOutput(success)
         C-->>U: redirect + flash success
@@ -127,20 +127,20 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     actor U as User
-    participant R as DestroyTaskRequest
+    participant Req as DestroyTaskRequest
     participant C as TaskController@destroy
     participant D as DeleteTaskInput
     participant DU as DeleteTaskUseCase
-    participant R as TaskRepositoryInterface
+    participant Repo as TaskRepositoryInterface
     participant ER as EloquentTaskRepository
     participant T as Task(Model)
 
-    U->>R: DELETE /tasks/{task_uuid}
-    R-->>C: validated(task_uuid)
+    U->>Req: DELETE /tasks/{task_uuid}
+    Req-->>C: validated(task_uuid)
     C->>D: Input DTO生成
     C->>DU: handle(input)
-    DU->>R: deleteTaskByUuid(task_uuid)
-    R->>ER: 実装呼び出し
+    DU->>Repo: deleteTaskByUuid(task_uuid)
+    Repo->>ER: 実装呼び出し
     ER->>T: DELETE(soft delete)
     alt 削除成功
         DU-->>C: TaskCommandOutput(success)

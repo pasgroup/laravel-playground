@@ -2,8 +2,6 @@
 
 namespace App\Application\Task\Repository;
 
-use Illuminate\Database\Eloquent\Collection;
-
 interface TaskRepositoryInterface
 {
     public function createTask(
@@ -13,7 +11,7 @@ interface TaskRepositoryInterface
         string $status
     ): int;
 
-    public function getTaskOrderByDueDate(): Collection;
+    public function getTaskOrderByDueDate(): iterable;
 
     public function findTaskStatusByUuid(string $task_uuid): ?string;
 
@@ -22,8 +20,6 @@ interface TaskRepositoryInterface
         string $current_status,
         string $next_status
     ): int;
-
-    public function existsTaskByUuid(string $task_uuid): bool;
 
     public function deleteTaskByUuid(string $task_uuid): bool;
 }

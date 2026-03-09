@@ -16,6 +16,7 @@ use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class TaskController extends Controller
@@ -40,9 +41,12 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $output = $this->list_tasks_use_case->handle();
+        $tasks = $output->tasks instanceof Collection
+            ? $output->tasks
+            : collect($output->tasks);
 
         return view('tasks.index', [
-            'tasks' => $output->tasks,
+            'tasks' => $tasks,
             'success_message' => $request->session()->get('success'),
         ]);
     }

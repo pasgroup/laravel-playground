@@ -50,15 +50,13 @@ final class UpdateTaskStatusUseCase
         );
 
         if ($updated === 0) {
-            if (! $this->task_repository->existsTaskByUuid($input->task_uuid)) {
+            $latest_status_value = $this->task_repository->findTaskStatusByUuid($input->task_uuid);
+
+            if ($latest_status_value === null) {
                 throw new TaskNotFoundException();
             }
 
-            $latest_status = TaskStatus::tryFrom(
-                (string) $this->task_repository->findTaskStatusByUuid(
-                    $input->task_uuid,
-                )
-            );
+            $latest_status = TaskStatus::tryFrom($latest_status_value);
 
             if ($latest_status === $next_status) {
                 return new TaskCommandOutput('success', 'タスクのステータスを更新しました。');

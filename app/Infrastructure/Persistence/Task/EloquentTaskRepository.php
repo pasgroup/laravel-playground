@@ -5,7 +5,6 @@ namespace App\Infrastructure\Persistence\Task;
 use App\Application\Task\Repository\TaskRepositoryInterface;
 use App\Domain\Task\TaskStatus;
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Collection;
 
 final class EloquentTaskRepository implements TaskRepositoryInterface
 {
@@ -30,7 +29,7 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
         return (int) $task->task_id;
     }
 
-    public function getTaskOrderByDueDate(): Collection
+    public function getTaskOrderByDueDate(): iterable
     {
         return $this->task->newQuery()
             ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
@@ -38,7 +37,8 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
-            ->get();
+            ->get()
+            ->all();
     }
 
     public function findTaskStatusByUuid(string $task_uuid): ?string
@@ -66,13 +66,6 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
             ->update([
                 'status' => $next_status,
             ]);
-    }
-
-    public function existsTaskByUuid(string $task_uuid): bool
-    {
-        return $this->task->newQuery()
-            ->where('task_uuid', $task_uuid)
-            ->exists();
     }
 
     public function deleteTaskByUuid(string $task_uuid): bool
