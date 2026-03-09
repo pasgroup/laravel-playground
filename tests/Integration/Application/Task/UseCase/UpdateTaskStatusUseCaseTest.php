@@ -6,7 +6,6 @@ use App\Application\Task\DTO\UpdateTaskStatusInput;
 use App\Application\Task\Exceptions\TaskNotFoundException;
 use App\Application\Task\UseCase\UpdateTaskStatusUseCase;
 use App\Domain\Task\TaskStatus;
-use App\Domain\Task\TaskTransition;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -20,7 +19,7 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     public function itUpdatesStatus(): void
     {
         $task = Task::factory()->notStarted()->create();
-        $use_case = new UpdateTaskStatusUseCase(new Task(), new TaskTransition());
+        $use_case = app(UpdateTaskStatusUseCase::class);
 
         $use_case->handle(
             new UpdateTaskStatusInput($task->task_uuid, TaskStatus::IN_PROGRESS->value)
@@ -37,7 +36,7 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     {
         $this->expectException(TaskNotFoundException::class);
 
-        $use_case = new UpdateTaskStatusUseCase(new Task(), new TaskTransition());
+        $use_case = app(UpdateTaskStatusUseCase::class);
         $use_case->handle(
             new UpdateTaskStatusInput(
                 '00000000-0000-0000-0000-000000000000',

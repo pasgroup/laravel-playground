@@ -6,14 +6,14 @@ use App\Application\Task\DTO\TaskCommandOutput;
 use App\Application\Task\DTO\UpdateTaskStatusInput;
 use App\Application\Task\Exceptions\InvalidTaskStatusTransitionException;
 use App\Application\Task\Exceptions\TaskNotFoundException;
+use App\Application\Task\Repository\TaskRepositoryInterface;
 use App\Domain\Task\TaskStatus;
 use App\Domain\Task\TaskTransition;
-use App\Models\Task;
 
 final class UpdateTaskStatusUseCase
 {
     public function __construct(
-        private Task $task,
+        private TaskRepositoryInterface $task_repository,
         private TaskTransition $task_transition
     ) {
     }
@@ -28,17 +28,12 @@ final class UpdateTaskStatusUseCase
         if ($next_status === null) {
             throw new InvalidTaskStatusTransitionException();
         }
-        $task_query = $this->task->newQuery();
-        $current_task = $task_query
-            ->select('task_id', 'status')
-            ->where('task_uuid', $input->task_uuid)
-            ->first();
-
-        if ($current_task === null) {
+        $current_status_value = $this->task_repository->findTaskStatusByUuid($input->task_uuid);
+        if ($current_status_value === null) {
             throw new TaskNotFoundException();
         }
 
-        $current_status = TaskStatus::tryFrom((string) $current_task->status);
+        $current_status = TaskStatus::tryFrom($current_status_value);
 
         if ($current_status === null || ! $this->task_transition->canTransition($current_status, $next_status)) {
             throw new InvalidTaskStatusTransitionException();
@@ -48,24 +43,22 @@ final class UpdateTaskStatusUseCase
             return new TaskCommandOutput('success', 'タスクのステータスを更新しました。');
         }
 
-        $updated = $this->task->newQuery()
-            ->where('task_uuid', $input->task_uuid)
-            ->where('status', $current_status->value)
-            ->update([
-                'status' => $next_status->value,
-            ]);
+        $updated = $this->task_repository->updateTaskStatusByUuidAndCurrentStatus(
+            $input->task_uuid,
+            $current_status->value,
+            $next_status->value
+        );
 
         if ($updated === 0) {
-            $latest = $this->task->newQuery()
-                ->select('status')
-                ->where('task_uuid', $input->task_uuid)
-                ->first();
-
-            if ($latest === null) {
+            if (! $this->task_repository->existsTaskByUuid($input->task_uuid)) {
                 throw new TaskNotFoundException();
             }
 
-            $latest_status = TaskStatus::tryFrom((string) $latest->status);
+            $latest_status = TaskStatus::tryFrom(
+                (string) $this->task_repository->findTaskStatusByUuid(
+                    $input->task_uuid,
+                )
+            );
 
             if ($latest_status === $next_status) {
                 return new TaskCommandOutput('success', 'タスクのステータスを更新しました。');

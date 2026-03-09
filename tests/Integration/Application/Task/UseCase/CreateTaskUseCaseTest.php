@@ -17,7 +17,7 @@ class CreateTaskUseCaseTest extends TestCase
     #[Test]
     public function itCreatesTaskWithExpectedStatus(): void
     {
-        $use_case = new CreateTaskUseCase(new Task());
+        $use_case = app(CreateTaskUseCase::class);
         $output = $use_case->handle(
             new CreateTaskInput(
                 '統合テスト_作成',

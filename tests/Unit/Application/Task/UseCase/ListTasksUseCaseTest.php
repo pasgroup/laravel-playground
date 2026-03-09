@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\Task\UseCase;
 
+use App\Application\Task\Repository\TaskRepositoryInterface;
 use App\Application\Task\UseCase\ListTasksUseCase;
-use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,13 +25,13 @@ class ListTasksUseCaseTest extends TestCase
             (object) ['task_id' => 2],
         ]);
 
-        /** @var Task $task */
-        $task = Mockery::mock(Task::class)->makePartial();
-        $task->shouldReceive('getTaskOrderByDueDate')
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('getTaskOrderByDueDate')
             ->once()
             ->andReturn($expected_tasks);
 
-        $use_case = new ListTasksUseCase($task);
+        $use_case = new ListTasksUseCase($task_repository);
         $output = $use_case->handle();
 
         $this->assertSame($expected_tasks, $output->tasks);

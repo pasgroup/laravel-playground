@@ -5,12 +5,12 @@ namespace App\Application\Task\UseCase;
 use App\Application\Task\DTO\DeleteTaskInput;
 use App\Application\Task\DTO\TaskCommandOutput;
 use App\Application\Task\Exceptions\TaskNotFoundException;
-use App\Models\Task;
+use App\Application\Task\Repository\TaskRepositoryInterface;
 
 final class DeleteTaskUseCase
 {
     public function __construct(
-        private Task $task
+        private TaskRepositoryInterface $task_repository
     ) {
     }
 
@@ -19,7 +19,7 @@ final class DeleteTaskUseCase
      */
     public function handle(DeleteTaskInput $input): TaskCommandOutput
     {
-        $deleted = $this->task->deleteByUuid($input->task_uuid);
+        $deleted = $this->task_repository->deleteTaskByUuid($input->task_uuid);
 
         if (! $deleted) {
             throw new TaskNotFoundException();

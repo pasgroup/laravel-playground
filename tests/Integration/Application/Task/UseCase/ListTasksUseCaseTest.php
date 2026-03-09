@@ -25,7 +25,7 @@ class ListTasksUseCaseTest extends TestCase
             'due_date' => '2026-03-01',
         ]);
 
-        $use_case = new ListTasksUseCase(new Task());
+        $use_case = app(ListTasksUseCase::class);
         $output = $use_case->handle();
 
         $this->assertCount(3, $output->tasks);

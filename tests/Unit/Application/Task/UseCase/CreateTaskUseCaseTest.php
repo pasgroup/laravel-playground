@@ -3,9 +3,9 @@
 namespace Tests\Unit\Application\Task\UseCase;
 
 use App\Application\Task\DTO\CreateTaskInput;
+use App\Application\Task\Repository\TaskRepositoryInterface;
 use App\Application\Task\UseCase\CreateTaskUseCase;
 use App\Domain\Task\TaskStatus;
-use App\Models\Task;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -21,27 +21,19 @@ class CreateTaskUseCaseTest extends TestCase
     #[Test]
     public function itCreatesTaskAndReturnsSuccessMessage(): void
     {
-        $created_task = new Task();
-        $created_task->task_id = 123;
-
-        $builder = Mockery::mock();
-        $builder->shouldReceive('create')
+        /** @var TaskRepositoryInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('createTask')
             ->once()
-            ->with([
-                'title' => 'ユースケース作成テスト',
-                'detail' => '詳細',
-                'due_date' => '2026-03-31',
-                'status' => TaskStatus::NOT_STARTED->value,
-            ])
-            ->andReturn($created_task);
+            ->with(
+                'ユースケース作成テスト',
+                '詳細',
+                '2026-03-31',
+                TaskStatus::NOT_STARTED->value
+            )
+            ->andReturn(123);
 
-        /** @var Task $task */
-        $task = Mockery::mock(Task::class)->makePartial();
-        $task->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($builder);
-
-        $use_case = new CreateTaskUseCase($task);
+        $use_case = new CreateTaskUseCase($task_repository);
         $output = $use_case->handle(
             new CreateTaskInput(
                 'ユースケース作成テスト',
