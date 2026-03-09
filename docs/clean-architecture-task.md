@@ -105,7 +105,7 @@
   - Application は「リポジトリのインターフェース（Port）」に依存する
   - 実装（Adapter）は Infrastructure に配置し、Laravel の DI で注入する
 
-```
+```text
 [Interface]  →  [Application]  →  [Domain]
      ↑                ↑
      |                +---- (Port/Interface のみ参照)
