@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Domain\Task\TaskDeadline;
+use App\Domain\Task\TaskStatus;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -44,13 +46,6 @@ class Task extends Model
     }
 
     /**
-     * タスクのステータス
-     */
-    public const STATUS_NOT_STARTED = 'not_started';
-    public const STATUS_IN_PROGRESS = 'in_progress';
-    public const STATUS_COMPLETED = 'completed';
-
-    /**
      * UUIDを自動生成
      *
      * @return void
@@ -64,27 +59,6 @@ class Task extends Model
                 $task->task_uuid = (string) Str::uuid();
             }
         });
-    }
-
-    /**
-     * ステータスを未着手でタスクを登録する
-     *
-     * @param string $title
-     * @param string|null $detail
-     * @param string|null $due_date
-     * @return self
-     */
-    public function createStatusNotStartedTask(
-        string $title,
-        ?string $detail = null,
-        ?string $due_date = null
-    ): self {
-        return $this->create([
-            'title' => $title,
-            'detail' => $detail,
-            'due_date' => $due_date,
-            'status' => self::STATUS_NOT_STARTED,
-        ]);
     }
 
     /**
@@ -127,7 +101,7 @@ class Task extends Model
     {
         return $this->query()
             ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
-            ->orderByRaw("(status != '" . self::STATUS_COMPLETED . "') DESC")
+            ->orderByRaw("(status != '" . TaskStatus::COMPLETED->value . "') DESC")
             ->orderByRaw('due_date IS NULL')
             ->orderBy('due_date', 'asc')
             ->orderBy('task_id', 'asc')
@@ -141,12 +115,13 @@ class Task extends Model
      */
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
-            self::STATUS_NOT_STARTED => '未着手',
-            self::STATUS_IN_PROGRESS => '進行中',
-            self::STATUS_COMPLETED => '完了',
-            default => '未設定',
-        };
+        $task_status = TaskStatus::tryFrom((string) $this->status);
+
+        if ($task_status === null) {
+            return '未設定';
+        }
+
+        return $task_status->label();
     }
 
     /**
@@ -156,7 +131,9 @@ class Task extends Model
      */
     public function getIsCompletedAttribute(): bool
     {
-        return $this->status === self::STATUS_COMPLETED;
+        $task_status = TaskStatus::tryFrom((string) $this->status);
+
+        return $task_status?->isCompleted() ?? false;
     }
 
     /**
@@ -166,6 +143,8 @@ class Task extends Model
      */
     public function getIsOverdueAttribute(): bool
     {
-        return ! $this->is_completed && $this->due_date && $this->due_date->lt(today());
+        $task_deadline = new TaskDeadline();
+
+        return $task_deadline->isOverdue((string) $this->status, $this->due_date);
     }
 }

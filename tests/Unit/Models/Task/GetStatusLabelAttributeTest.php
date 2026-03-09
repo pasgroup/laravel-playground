@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models\Task;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,19 +26,19 @@ class GetStatusLabelAttributeTest extends TestCase
     public static function statusLabelProvider(): array
     {
         return [
-            '未着手' => [
-                Task::STATUS_NOT_STARTED,
+            'not_started' => [
+                TaskStatus::NOT_STARTED->value,
                 '未着手',
             ],
-            '進行中' => [
-                Task::STATUS_IN_PROGRESS,
+            'in_progress' => [
+                TaskStatus::IN_PROGRESS->value,
                 '進行中',
             ],
-            '完了' => [
-                Task::STATUS_COMPLETED,
+            'completed' => [
+                TaskStatus::COMPLETED->value,
                 '完了',
             ],
-            '未定義' => [
+            'undefined' => [
                 'unknown_status',
                 '未設定',
             ],

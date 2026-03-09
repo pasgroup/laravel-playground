@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models\Task;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -36,32 +37,32 @@ class GetIsOverdueAttributeTest extends TestCase
 
         return [
             'not_started with past due_date returns true' => [
-                Task::STATUS_NOT_STARTED,
+                TaskStatus::NOT_STARTED->value,
                 $yesterday,
                 true,
             ],
             'in_progress with past due_date returns true' => [
-                Task::STATUS_IN_PROGRESS,
+                TaskStatus::IN_PROGRESS->value,
                 $yesterday,
                 true,
             ],
             'completed with past due_date returns false' => [
-                Task::STATUS_COMPLETED,
+                TaskStatus::COMPLETED->value,
                 $yesterday,
                 false,
             ],
             'not_started with future due_date returns false' => [
-                Task::STATUS_NOT_STARTED,
+                TaskStatus::NOT_STARTED->value,
                 $tomorrow,
                 false,
             ],
             'not_started with today due_date returns false' => [
-                Task::STATUS_NOT_STARTED,
+                TaskStatus::NOT_STARTED->value,
                 $today,
                 false,
             ],
             'not_started with null due_date returns false' => [
-                Task::STATUS_NOT_STARTED,
+                TaskStatus::NOT_STARTED->value,
                 null,
                 false,
             ],

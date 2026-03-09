@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Task;
+use App\Domain\Task\TaskStatus;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -49,13 +49,33 @@ class UpdateTaskStatusRequest extends FormRequest
             'status' => [
                 'required',
                 'string',
-                Rule::in([
-                    Task::STATUS_NOT_STARTED,
-                    Task::STATUS_IN_PROGRESS,
-                    Task::STATUS_COMPLETED,
-                ]),
+                Rule::in($this->statusValues()),
             ],
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function statusValues(): array
+    {
+        return array_map(
+            fn (TaskStatus $task_status): string => $task_status->value,
+            TaskStatus::cases()
+        );
+    }
+
+    /**
+     * ステータスのラベル一覧（エラーメッセージ用）
+     *
+     * @return list<string>
+     */
+    private function statusLabels(): array
+    {
+        return array_map(
+            fn (TaskStatus $task_status): string => $task_status->label(),
+            TaskStatus::cases()
+        );
     }
 
     /**
@@ -71,7 +91,7 @@ class UpdateTaskStatusRequest extends FormRequest
             'task_uuid.exists' => '指定されたタスクは存在しないか、既に削除されています。',
             'status.required' => 'ステータスを指定してください。',
             'status.string' => 'ステータスの形式が不正です。',
-            'status.in' => 'ステータスは未着手・進行中・完了のいずれかを指定してください。',
+            'status.in' => 'ステータスは' . implode('・', $this->statusLabels()) . 'のいずれかを指定してください。',
         ];
     }
 

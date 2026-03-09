@@ -2,6 +2,7 @@
 
 namespace Tests\Browser\TaskController;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use Laravel\Dusk\Browser;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,11 +26,11 @@ class UpdateStatusTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($task) {
             $browser->visit(route('tasks.index'))
                 ->assertSeeIn('@index-task-title-' . $task->task_id, $task->title)
-                ->assertSelected('@index-status-select-' . $task->task_id, Task::STATUS_NOT_STARTED)
-                ->select('@index-status-select-' . $task->task_id, Task::STATUS_IN_PROGRESS)
+                ->assertSelected('@index-status-select-' . $task->task_id, TaskStatus::NOT_STARTED->value)
+                ->select('@index-status-select-' . $task->task_id, TaskStatus::IN_PROGRESS->value)
                 ->waitFor('@toast-message', 3)
                 ->assertSeeIn('@toast-message', 'タスクのステータスを更新しました。')
-                ->assertSelected('@index-status-select-' . $task->task_id, Task::STATUS_IN_PROGRESS);
+                ->assertSelected('@index-status-select-' . $task->task_id, TaskStatus::IN_PROGRESS->value);
         });
     }
 }

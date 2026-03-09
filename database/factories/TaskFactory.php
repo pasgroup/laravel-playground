@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class TaskFactory extends Factory
             'title' => 'テストタイトル',
             'detail' => 'テスト詳細',
             'due_date' => now()->addDays(3)->toDateString(),
-            'status' => Task::STATUS_NOT_STARTED,
+            'status' => TaskStatus::NOT_STARTED->value,
         ];
     }
 
@@ -38,7 +39,7 @@ class TaskFactory extends Factory
      */
     public function notStarted(): self
     {
-        return $this->state(fn () => ['status' => Task::STATUS_NOT_STARTED]);
+        return $this->state(fn () => ['status' => TaskStatus::NOT_STARTED->value]);
     }
 
     /**
@@ -48,7 +49,7 @@ class TaskFactory extends Factory
      */
     public function inProgress(): self
     {
-        return $this->state(fn () => ['status' => Task::STATUS_IN_PROGRESS]);
+        return $this->state(fn () => ['status' => TaskStatus::IN_PROGRESS->value]);
     }
 
     /**
@@ -58,6 +59,6 @@ class TaskFactory extends Factory
      */
     public function completed(): self
     {
-        return $this->state(fn () => ['status' => Task::STATUS_COMPLETED]);
+        return $this->state(fn () => ['status' => TaskStatus::COMPLETED->value]);
     }
 }
