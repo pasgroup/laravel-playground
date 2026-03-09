@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Domain\Task\TaskStatus;
+use App\Domain\Task\TaskTransition;
 use App\Http\Requests\DestroyTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
@@ -16,7 +18,8 @@ class TaskController extends Controller
      * コンストラクタ
      */
     public function __construct(
-        protected Task $task
+        protected Task $task,
+        protected TaskTransition $task_transition
     ) {
     }
 
@@ -57,11 +60,12 @@ class TaskController extends Controller
     {
         $validated = $request->validated();
 
-        $this->task->createStatusNotStartedTask(
-            $validated['title'],
-            $validated['detail'] ?? null,
-            $validated['due_date'] ?? null
-        );
+        $this->task->newQuery()->create([
+            'title' => $validated['title'],
+            'detail' => $validated['detail'] ?? null,
+            'due_date' => $validated['due_date'] ?? null,
+            'status' => TaskStatus::NOT_STARTED->value,
+        ]);
 
         return redirect()->route('tasks.index')->with('success', 'タスクを登録しました。');
     }
@@ -91,9 +95,22 @@ class TaskController extends Controller
      */
     public function updateStatus(UpdateTaskStatusRequest $request): RedirectResponse
     {
+        $task_uuid = $request->validated('task_uuid');
+        $next_status = TaskStatus::from((string) $request->validated('status'));
+        $current_task = $this->task->newQuery()
+            ->select('task_id', 'status')
+            ->where('task_uuid', $task_uuid)
+            ->first();
+
+        $current_status = $current_task !== null ? TaskStatus::tryFrom((string) $current_task->status) : null;
+
+        if ($current_status === null || ! $this->task_transition->canTransition($current_status, $next_status)) {
+            return redirect()->route('tasks.index')->with('error', '許可されていないステータス遷移です。');
+        }
+
         $updated = $this->task->updateStatusByUuid(
-            $request->validated('task_uuid'),
-            $request->validated('status')
+            $task_uuid,
+            $next_status->value
         );
 
         $type = $updated ? 'success' : 'error';

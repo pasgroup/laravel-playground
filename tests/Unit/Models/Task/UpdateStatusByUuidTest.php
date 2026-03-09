@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models\Task;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -19,7 +20,7 @@ class UpdateStatusByUuidTest extends TestCase
     public function itReturnsTrueWhenUpdateAffectsOneRow(): void
     {
         $task_uuid = '00000000-0000-0000-0000-000000000000';
-        $status = Task::STATUS_IN_PROGRESS;
+        $status = TaskStatus::IN_PROGRESS->value;
         $query_mock = Mockery::mock();
         $query_mock->shouldReceive('update')
             ->once()
@@ -42,7 +43,7 @@ class UpdateStatusByUuidTest extends TestCase
     public function itReturnsFalseWhenUpdateAffectsZeroRows(): void
     {
         $task_uuid = '11111111-1111-1111-1111-111111111111';
-        $status = Task::STATUS_COMPLETED;
+        $status = TaskStatus::COMPLETED->value;
         $query_mock = Mockery::mock();
         $query_mock->shouldReceive('update')
             ->once()
@@ -77,7 +78,7 @@ class UpdateStatusByUuidTest extends TestCase
     public function itReturnsTrueWhenUpdateAffectsZeroRowsButRecordExists(): void
     {
         $task_uuid = '22222222-2222-2222-2222-222222222222';
-        $status = Task::STATUS_NOT_STARTED;
+        $status = TaskStatus::NOT_STARTED->value;
         $query_mock = Mockery::mock();
         $query_mock->shouldReceive('update')
             ->once()

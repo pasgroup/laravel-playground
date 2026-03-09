@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models\Task;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
@@ -25,9 +26,9 @@ class GetIsCompletedAttributeTest extends TestCase
     public static function statusProvider(): array
     {
         return [
-            'not_started' => [Task::STATUS_NOT_STARTED, false],
-            'in_progress' => [Task::STATUS_IN_PROGRESS, false],
-            'completed' => [Task::STATUS_COMPLETED, true],
+            'not_started' => [TaskStatus::NOT_STARTED->value, false],
+            'in_progress' => [TaskStatus::IN_PROGRESS->value, false],
+            'completed' => [TaskStatus::COMPLETED->value, true],
         ];
     }
 }

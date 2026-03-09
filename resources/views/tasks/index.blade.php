@@ -4,9 +4,9 @@
 
 @section('content')
     @php
-        $status_not_started = \App\Models\Task::STATUS_NOT_STARTED;
-        $status_in_progress = \App\Models\Task::STATUS_IN_PROGRESS;
-        $status_completed = \App\Models\Task::STATUS_COMPLETED;
+        $status_not_started = \App\Domain\Task\TaskStatus::NOT_STARTED->value;
+        $status_in_progress = \App\Domain\Task\TaskStatus::IN_PROGRESS->value;
+        $status_completed = \App\Domain\Task\TaskStatus::COMPLETED->value;
     @endphp
     <header class="task-header">
         <h1 class="task-title" dusk="index-heading">タスク一覧</h1>

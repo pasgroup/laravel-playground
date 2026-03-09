@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Task;
+use App\Domain\Task\TaskStatus;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
@@ -49,13 +49,20 @@ class UpdateTaskStatusRequest extends FormRequest
             'status' => [
                 'required',
                 'string',
-                Rule::in([
-                    Task::STATUS_NOT_STARTED,
-                    Task::STATUS_IN_PROGRESS,
-                    Task::STATUS_COMPLETED,
-                ]),
+                Rule::in($this->statusValues()),
             ],
         ];
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function statusValues(): array
+    {
+        return array_map(
+            fn (TaskStatus $task_status): string => $task_status->value,
+            TaskStatus::cases()
+        );
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Models\Task;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Collection;
 use Mockery;
@@ -27,7 +28,7 @@ class GetTaskOrderByDueDateTest extends TestCase
             ->andReturnSelf();
         $builder->shouldReceive('orderByRaw')
             ->once()
-            ->with("(status != '" . Task::STATUS_COMPLETED . "') DESC")
+            ->with("(status != '" . TaskStatus::COMPLETED->value . "') DESC")
             ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderByRaw')
@@ -73,7 +74,7 @@ class GetTaskOrderByDueDateTest extends TestCase
             ->andReturnSelf()
             ->ordered();
         $builder->shouldReceive('orderByRaw')
-            ->with("(status != '" . Task::STATUS_COMPLETED . "') DESC")
+            ->with("(status != '" . TaskStatus::COMPLETED->value . "') DESC")
             ->ordered()
             ->andReturnSelf();
         $builder->shouldReceive('orderByRaw')

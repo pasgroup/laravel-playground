@@ -2,6 +2,7 @@
 
 namespace Tests\Integration\Http\Requests;
 
+use App\Domain\Task\TaskStatus;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -71,24 +72,24 @@ class UpdateTaskStatusRequestTest extends TestCase
         return [
             'updates to not started' => [
                 self::TASK_UUID,
-                ['status' => Task::STATUS_NOT_STARTED],
+                ['status' => TaskStatus::NOT_STARTED->value],
                 'success',
                 'タスクのステータスを更新しました。',
-                Task::STATUS_NOT_STARTED,
+                TaskStatus::NOT_STARTED->value,
             ],
             'updates to in progress' => [
                 self::TASK_UUID,
-                ['status' => Task::STATUS_IN_PROGRESS],
+                ['status' => TaskStatus::IN_PROGRESS->value],
                 'success',
                 'タスクのステータスを更新しました。',
-                Task::STATUS_IN_PROGRESS,
+                TaskStatus::IN_PROGRESS->value,
             ],
             'updates to completed' => [
                 self::TASK_UUID,
-                ['status' => Task::STATUS_COMPLETED],
+                ['status' => TaskStatus::COMPLETED->value],
                 'success',
                 'タスクのステータスを更新しました。',
-                Task::STATUS_COMPLETED,
+                TaskStatus::COMPLETED->value,
             ],
             'invalid status value' => [
                 self::TASK_UUID,
@@ -113,21 +114,21 @@ class UpdateTaskStatusRequestTest extends TestCase
             ],
             'redirects with error when task uuid does not exist' => [
                 self::NOT_FOUND_UUID,
-                ['status' => Task::STATUS_NOT_STARTED],
+                ['status' => TaskStatus::NOT_STARTED->value],
                 'error',
                 '指定されたタスクは存在しないか、既に削除されています。',
                 null,
             ],
             'redirects with error when task uuid format is invalid' => [
                 'invalid-task-uuid',
-                ['status' => Task::STATUS_NOT_STARTED],
+                ['status' => TaskStatus::NOT_STARTED->value],
                 'error',
                 'タスクの指定が不正です。',
                 null,
             ],
             'redirects with error when task is soft deleted' => [
                 self::SOFT_DELETED_TASK_UUID,
-                ['status' => Task::STATUS_IN_PROGRESS],
+                ['status' => TaskStatus::IN_PROGRESS->value],
                 'error',
                 '指定されたタスクは存在しないか、既に削除されています。',
                 null,
