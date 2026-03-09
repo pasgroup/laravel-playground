@@ -6,6 +6,7 @@ use App\Domain\Task\Entity\TaskEntity;
 use App\Domain\Task\Specification\TaskDeadline;
 use App\Http\Presenters\Task\ViewModel\TaskIndexItemViewModel;
 use Carbon\CarbonInterface;
+use LogicException;
 
 final class TaskIndexItemFormatter
 {
@@ -16,6 +17,10 @@ final class TaskIndexItemFormatter
 
     public function toViewModel(TaskEntity $task, ?TaskEntity $previous_task): TaskIndexItemViewModel
     {
+        if ($task->task_id === null) {
+            throw new LogicException('TaskEntity.task_id must not be null when rendering index view.');
+        }
+
         $is_first_completed = $previous_task !== null
             && $task->isCompleted()
             && ! $previous_task->isCompleted();

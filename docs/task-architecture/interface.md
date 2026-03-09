@@ -11,11 +11,11 @@
 
 - Controller: 入力受付、UseCase呼び出し、例外ハンドリング
 - FormRequest: バリデーションと認可
-- Presenter / Formatter: 表示専用データへの変換
-- ViewModel / Blade: 描画専用
+- Presenter / Formatter: Application出力DTOを表示用または応答用データへ変換
+- ViewModel / Blade: 画面描画専用（flash/redirectは Presenter が整形）
 
 ## 依存ルール
 
 - Controller は UseCase を呼ぶ（Model直参照しない）
-- Presenter は Application の出力DTOを受け、ViewModelへ整形する
+- Presenter は Application の出力DTOを受け、ViewModelまたはflash応答データへ整形する
 - Blade は ViewModel の値を描画するだけにする

@@ -247,6 +247,39 @@ class UpdateTaskStatusUseCaseTest extends TestCase
     }
 
     #[Test]
+    public function itThrowsInvalidTransitionWhenAffectedRowsAreZeroAndLatestStateStillOld(): void
+    {
+        $this->expectException(InvalidTaskStatusTransitionException::class);
+        $task_uuid = '11111111-1111-1111-1111-111111111111';
+        /** @var TaskRepositoryInterface&\Mockery\MockInterface $task_repository */
+        $task_repository = Mockery::mock(TaskRepositoryInterface::class);
+        $task_repository->shouldReceive('findByUuid')
+            ->once()
+            ->with($task_uuid)
+            ->andReturn(new TaskEntity(1, $task_uuid, 'task', null, null, TaskStatus::NOT_STARTED->value));
+        $task_repository->shouldReceive('updateTaskStatusByUuidAndCurrentStatus')
+            ->once()
+            ->with(
+                $task_uuid,
+                TaskStatus::NOT_STARTED,
+                TaskStatus::IN_PROGRESS
+            )
+            ->andReturn(0);
+        $task_repository->shouldReceive('findByUuid')
+            ->once()
+            ->with($task_uuid)
+            ->andReturn(new TaskEntity(1, $task_uuid, 'task', null, null, TaskStatus::NOT_STARTED->value));
+
+        $use_case = new UpdateTaskStatusUseCase(
+            $task_repository,
+            new TaskStatusDecisionService(new TaskTransition())
+        );
+        $use_case->handle(
+            new UpdateTaskStatusInput($task_uuid, TaskStatus::IN_PROGRESS->value)
+        );
+    }
+
+    #[Test]
     public function itThrowsNotFoundWhenAffectedRowsAreUnexpectedCount(): void
     {
         $this->expectException(TaskNotFoundException::class);

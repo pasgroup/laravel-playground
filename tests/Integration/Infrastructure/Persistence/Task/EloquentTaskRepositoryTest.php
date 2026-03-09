@@ -38,6 +38,7 @@ class EloquentTaskRepositoryTest extends TestCase
         $task = Task::factory()->create([
             'detail' => null,
             'due_date' => null,
+            'status' => 'not_started',
         ]);
         $repository = app(EloquentTaskRepository::class);
         $items = $repository->getTaskOrderByDueDate();

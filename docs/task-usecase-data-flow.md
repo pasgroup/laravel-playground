@@ -33,7 +33,7 @@ flowchart LR
     Port -. resolve .-> DI --> Repo --> Model
     UseCase --> Output
     Output --> Controller
-    Controller <--> Presenter
+    Controller --> Presenter
     Presenter --> ViewModel
     Controller --> View
     ViewModel --> View

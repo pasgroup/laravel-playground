@@ -11,22 +11,14 @@ final class TaskTransition implements TaskTransitionPolicyInterface
      */
     private static array $allowed_transitions = [];
 
-    public function canTransition(string|TaskStatus $from_status, string|TaskStatus $to_status): bool
+    public function canTransition(TaskStatus $from_status, TaskStatus $to_status): bool
     {
         self::initializeAllowedTransitions();
-        $from_status_value = $this->resolveStatus($from_status);
-        $to_status_value = $this->resolveStatus($to_status);
-
-        if ($from_status_value === null || $to_status_value === null) {
-            return false;
-        }
-
-        return in_array($to_status_value->value, self::$allowed_transitions[$from_status_value->value], true);
-    }
-
-    private function resolveStatus(string|TaskStatus $status): ?TaskStatus
-    {
-        return $status instanceof TaskStatus ? $status : TaskStatus::tryFrom($status);
+        return in_array(
+            $to_status->value,
+            self::$allowed_transitions[$from_status->value] ?? [],
+            true
+        );
     }
 
     private static function initializeAllowedTransitions(): void

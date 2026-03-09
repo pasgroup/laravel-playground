@@ -25,7 +25,7 @@ final class TaskFlashPresenter
     {
         return [
             'flash_type' => 'error',
-            'flash_message' => $exception->getMessage(),
+            'flash_message' => $exception->getPublicMessage(),
         ];
     }
 }
