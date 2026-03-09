@@ -1,6 +1,6 @@
 # Clean Architecture 導入方針（Task機能）
 
-本ドキュメントは、Task機能を対象とした **Domain / Application / Infrastructure / Interface** の責務・依存方向・命名/配置ルール・移行順序を定め、以降の実装Issueで設計判断に迷わないようにするための方針である。
+本ドキュメントは、Task機能を対象とした **Domain / Application / Infrastructure / Interface** の責務・依存方向・命名/配置ルール・移行順序を定め、以降の実装タスクで設計判断に迷わないようにするための方針である。
 
 ---
 
@@ -41,8 +41,8 @@
 
 - ユースケースクラス（例: CreateTaskUseCase, UpdateTaskStatusUseCase, DeleteTaskUseCase, ListTasksUseCase）
 - 入力DTO（Use Case への引数をまとめたオブジェクト）
-- 出力DTO または ドメインエンティティの返却（方針でどちらにするか決める）
-- ドメインのリポジトリ**インターフェース**（Port）の利用
+- UseCase はドメインエンティティを返却し、Interface 層で必要に応じて DTO/ViewModel に変換する（ドメイン中心アプローチ）。変換は Interface 層で行い、UseCase はドメインの型のみを返す。
+- Application 層に定義したリポジトリ**インターフェース**（Port）の利用
 
 **含めないもの**
 
@@ -150,7 +150,7 @@
 
 ### 3.3 ファイル配置例（Task 機能）
 
-```
+```text
 app/
 ├── Domain/
 │   └── Task/
@@ -177,7 +177,7 @@ app/
 │       └── ...
 ```
 
-- 既存の `App\Models\Task` は、移行期間中は Eloquent Model として Infrastructure に相当する役割を持たせ、段階的に `Domain\Task` と `Infrastructure\Persistence\Task\EloquentTaskModel` に分離するかどうかは移行Issueで判断する
+- 既存の `App\Models\Task` は、移行期間中は Eloquent Model として Infrastructure に相当する役割を持たせ、段階的に `Domain\Task` と `Infrastructure\Persistence\Task\EloquentTaskModel` に分離するかどうかは移行タスクで判断する
 
 ---
 
@@ -228,7 +228,7 @@ app/
 - Task機能に対するレイヤー責務（Domain / Application / Infrastructure / Interface）が文書化されている
 - 依存方向（内側依存）と DI 方針（Port/Adapter）が図と文章で定義されている
 - 命名規約・配置規約が、少なくとも Task 機能で迷わず適用できる粒度で記載されている
-- 移行順序（Domain → Application → Infrastructure → Interface → Test）が定義され、次Issueに分割可能な状態になっている
+- 移行順序（Domain → Application → Infrastructure → Interface → Test）が定義され、次タスクに分割可能な状態になっている
 - レビューで内容が合意され、Task 実装の判断基準として利用可能である
 
 ---
