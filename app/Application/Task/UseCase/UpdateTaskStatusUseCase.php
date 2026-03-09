@@ -44,6 +44,10 @@ final class UpdateTaskStatusUseCase
             throw new InvalidTaskStatusTransitionException();
         }
 
+        if ($current_status === $next_status) {
+            return new TaskCommandOutput('success', 'タスクのステータスを更新しました。');
+        }
+
         $updated = $this->task->newQuery()
             ->where('task_uuid', $input->task_uuid)
             ->where('status', $current_status->value)
@@ -58,6 +62,15 @@ final class UpdateTaskStatusUseCase
 
             if (! $task_exists) {
                 throw new TaskNotFoundException();
+            }
+
+            $latest = $this->task->newQuery()
+                ->select('status')
+                ->where('task_uuid', $input->task_uuid)
+                ->first();
+            $latest_status = $latest !== null ? TaskStatus::tryFrom((string) $latest->status) : null;
+            if ($latest_status === $next_status) {
+                return new TaskCommandOutput('success', 'タスクのステータスを更新しました。');
             }
 
             throw new InvalidTaskStatusTransitionException();
