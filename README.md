@@ -38,7 +38,6 @@ herd php artisan migrate
 期限切れのタスクは一覧で赤文字で表示される。
 
 ---
-
 ## ブランチ運用
 
 - **master**: 基本的な MVC 構成の簡易タスク管理アプリ。検証用の追加は入れない。
@@ -47,22 +46,14 @@ herd php artisan migrate
 
 ### このブランチで検証しているものをここに記載
 
-- **ブランチ名**: master
+- **ブランチ名**: clean_architecture_master
 - **検証ツール**:
-  - [CodeRabbit](https://www.coderabbit.ai/ja)
-    - コードレビューの自動化
-    - サンプル（[タスクのステータス変更操作と一覧への反映を実装する #19](https://github.com/pasgroup/laravel-playground/pull/22)）
-      - 重要な指摘は該当のコードへのコメント（修正案まで出してくれる）
-      - 細かなアドバイスについては、コメントのNitpick commentsを開くと見られる
-  - [Codecov](https://app.codecov.io/gh/pasgroup/laravel-playground/)
-    - カバレッジ表示
-    - Github actions でテストを実行して反映させている
-    - パーセンテージも検証しているので、Github actions の実行時に規程を下回った場合に、actionを失敗させたりもできる
-    - ブランチごとにカバレッジの確認が可能
+  - なし（masterと同様）
 
 - **採用・検証中のアーキテクチャ**: 
-  - 基本的なMVC（ここからブランチを切って、他のアーキテクチャを検証しやすくするため）
-  - テストコードなどは現在のルールを踏襲
+  - [Clean Architecture 導入方針（Task機能）](docs/clean-architecture-task.md) … Task機能の Domain / Application / Infrastructure / Interface の責務・依存・命名・移行順序
+    - 基本のMVC（master）との差分を確認することで、クリーンアーキテクチャ化した時の変更箇所を学習しやすくするため
+    - 他のプロジェクト内で、アーキテクチャをどのようにするか、検討する材料とするため
 
 
 ---
