@@ -17,6 +17,10 @@ class TaskTransitionTest extends TestCase
         $this->assertTrue($task_transition->canTransition(TaskStatus::NOT_STARTED, TaskStatus::IN_PROGRESS));
         $this->assertTrue($task_transition->canTransition(TaskStatus::IN_PROGRESS, TaskStatus::COMPLETED));
         $this->assertTrue($task_transition->canTransition(TaskStatus::COMPLETED, TaskStatus::NOT_STARTED));
+
+        $this->assertTrue($task_transition->canTransition(TaskStatus::NOT_STARTED, TaskStatus::NOT_STARTED));
+        $this->assertTrue($task_transition->canTransition(TaskStatus::IN_PROGRESS, TaskStatus::IN_PROGRESS));
+        $this->assertTrue($task_transition->canTransition(TaskStatus::COMPLETED, TaskStatus::COMPLETED));
     }
 
     #[Test]

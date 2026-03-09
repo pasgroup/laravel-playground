@@ -51,9 +51,7 @@
                                 <form action="{{ route('tasks.status.update', ['task_uuid' => $task->task_uuid]) }}" method="post" class="task-form-inline task-status-form">
                                     @csrf
                                     @php
-                                        $current_status_value = $task->status instanceof \App\Domain\Task\TaskStatus
-                                            ? $task->status->value
-                                            : (string) $task->status;
+                                        $current_status_value = (string) $task->status;
                                     @endphp
                                     <select name="status" class="task-status-select" aria-label="ステータス" onchange="this.form.submit()" dusk="index-status-select-{{ $task->task_id }}">
                                         <option value="{{ $status_not_started }}" @selected($current_status_value === $status_not_started)>未着手</option>

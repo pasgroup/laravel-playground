@@ -18,8 +18,12 @@ class TaskDeadlineTest extends TestCase
         $task_deadline = new TaskDeadline();
 
         Carbon::setTestNow('2026-03-10 12:00:00');
-        $this->assertSame($expected, $task_deadline->isOverdue($status, $due_date));
-        Carbon::setTestNow();
+        try {
+            $this->assertSame($expected, $task_deadline->isOverdue($status, $due_date));
+        } finally {
+            // テスト失敗時にもテスト時間がリセットされるように finally でリセット
+            Carbon::setTestNow();
+        }
     }
 
     /**
@@ -33,6 +37,7 @@ class TaskDeadlineTest extends TestCase
             'future and not completed' => [TaskStatus::IN_PROGRESS, '2026-03-11', false],
             'past but completed' => [TaskStatus::COMPLETED, '2026-03-09', false],
             'null due date' => [TaskStatus::NOT_STARTED, null, false],
+            'string status' => [TaskStatus::NOT_STARTED->value, '2026-03-09', true],
         ];
     }
 }

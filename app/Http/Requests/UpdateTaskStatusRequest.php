@@ -66,6 +66,19 @@ class UpdateTaskStatusRequest extends FormRequest
     }
 
     /**
+     * ステータスのラベル一覧（エラーメッセージ用）
+     *
+     * @return list<string>
+     */
+    private function statusLabels(): array
+    {
+        return array_map(
+            fn (TaskStatus $task_status): string => $task_status->label(),
+            TaskStatus::cases()
+        );
+    }
+
+    /**
      * バリデーションエラーメッセージ
      *
      * @return array<string, string>
@@ -78,7 +91,7 @@ class UpdateTaskStatusRequest extends FormRequest
             'task_uuid.exists' => '指定されたタスクは存在しないか、既に削除されています。',
             'status.required' => 'ステータスを指定してください。',
             'status.string' => 'ステータスの形式が不正です。',
-            'status.in' => 'ステータスは未着手・進行中・完了のいずれかを指定してください。',
+            'status.in' => 'ステータスは' . implode('・', $this->statusLabels()) . 'のいずれかを指定してください。',
         ];
     }
 
