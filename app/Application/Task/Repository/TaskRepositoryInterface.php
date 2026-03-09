@@ -2,28 +2,24 @@
 
 namespace App\Application\Task\Repository;
 
-use App\Application\Task\DTO\TaskListItemDto;
+use App\Domain\Task\Entity\TaskEntity;
+use App\Domain\Task\ValueObject\TaskStatus;
 
 interface TaskRepositoryInterface
 {
-    public function createTask(
-        string $title,
-        ?string $detail,
-        ?string $due_date,
-        string $status
-    ): int;
+    public function create(TaskEntity $task_entity): TaskEntity;
 
     /**
-     * @return list<TaskListItemDto>
+     * @return list<TaskEntity>
      */
     public function getTaskOrderByDueDate(): array;
 
-    public function findTaskStatusByUuid(string $task_uuid): ?string;
+    public function findByUuid(string $task_uuid): ?TaskEntity;
 
     public function updateTaskStatusByUuidAndCurrentStatus(
         string $task_uuid,
-        string $current_status,
-        string $next_status
+        TaskStatus $current_status,
+        TaskStatus $next_status
     ): int;
 
     public function deleteTaskByUuid(string $task_uuid): bool;

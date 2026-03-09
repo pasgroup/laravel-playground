@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Domain\Task;
 
-use App\Domain\Task\TaskStatus;
-use App\Domain\Task\TaskTransition;
+use App\Domain\Task\Policy\TaskTransition;
+use App\Domain\Task\ValueObject\TaskStatus;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 

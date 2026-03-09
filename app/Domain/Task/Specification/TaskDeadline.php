@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Domain\Task;
+namespace App\Domain\Task\Specification;
 
+use App\Domain\Task\ValueObject\TaskStatus;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 

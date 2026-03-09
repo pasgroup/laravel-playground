@@ -11,12 +11,13 @@ use App\Application\Task\UseCase\CreateTaskUseCase;
 use App\Application\Task\UseCase\DeleteTaskUseCase;
 use App\Application\Task\UseCase\ListTasksUseCase;
 use App\Application\Task\UseCase\UpdateTaskStatusUseCase;
+use App\Http\Presenters\Task\TaskFlashPresenter;
+use App\Http\Presenters\Task\TaskIndexPresenter;
 use App\Http\Requests\DestroyTaskRequest;
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskStatusRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 class TaskController extends Controller
@@ -28,7 +29,9 @@ class TaskController extends Controller
         protected ListTasksUseCase $list_tasks_use_case,
         protected CreateTaskUseCase $create_task_use_case,
         protected DeleteTaskUseCase $delete_task_use_case,
-        protected UpdateTaskStatusUseCase $update_task_status_use_case
+        protected UpdateTaskStatusUseCase $update_task_status_use_case,
+        protected TaskIndexPresenter $task_index_presenter,
+        protected TaskFlashPresenter $task_flash_presenter
     ) {
     }
 
@@ -41,13 +44,14 @@ class TaskController extends Controller
     public function index(Request $request): View
     {
         $output = $this->list_tasks_use_case->handle();
-        $tasks = $output->tasks instanceof Collection
-            ? $output->tasks
-            : collect($output->tasks);
+        $view_model = $this->task_index_presenter->present(
+            $output,
+            $request->session()->get('success'),
+            $request->session()->get('error')
+        );
 
         return view('tasks.index', [
-            'tasks' => $tasks,
-            'success_message' => $request->session()->get('success'),
+            'view_model' => $view_model,
         ]);
     }
 
@@ -97,7 +101,7 @@ class TaskController extends Controller
 
             return $this->redirectWithOutput($output);
         } catch (TaskApplicationException $exception) {
-            return redirect()->route('tasks.index')->with('error', $exception->getMessage());
+            return $this->redirectWithException($exception);
         }
     }
 
@@ -119,15 +123,27 @@ class TaskController extends Controller
 
             return $this->redirectWithOutput($output);
         } catch (TaskApplicationException $exception) {
-            return redirect()->route('tasks.index')->with('error', $exception->getMessage());
+            return $this->redirectWithException($exception);
         }
     }
 
     private function redirectWithOutput(TaskCommandOutput $output): RedirectResponse
     {
+        $flash = $this->task_flash_presenter->presentCommand($output);
+
         return redirect()->route('tasks.index')->with(
-            $output->flash_type,
-            $output->flash_message
+            $flash['flash_type'],
+            $flash['flash_message']
+        );
+    }
+
+    private function redirectWithException(TaskApplicationException $exception): RedirectResponse
+    {
+        $flash = $this->task_flash_presenter->presentException($exception);
+
+        return redirect()->route('tasks.index')->with(
+            $flash['flash_type'],
+            $flash['flash_message']
         );
     }
 }

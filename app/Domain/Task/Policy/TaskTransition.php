@@ -1,8 +1,10 @@
 <?php
 
-namespace App\Domain\Task;
+namespace App\Domain\Task\Policy;
 
-final class TaskTransition
+use App\Domain\Task\ValueObject\TaskStatus;
+
+final class TaskTransition implements TaskTransitionPolicyInterface
 {
     /**
      * @var array<string, list<string>>

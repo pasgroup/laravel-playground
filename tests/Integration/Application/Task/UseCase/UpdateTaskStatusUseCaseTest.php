@@ -5,7 +5,7 @@ namespace Tests\Integration\Application\Task\UseCase;
 use App\Application\Task\DTO\UpdateTaskStatusInput;
 use App\Application\Task\Exceptions\TaskNotFoundException;
 use App\Application\Task\UseCase\UpdateTaskStatusUseCase;
-use App\Domain\Task\TaskStatus;
+use App\Domain\Task\ValueObject\TaskStatus;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;

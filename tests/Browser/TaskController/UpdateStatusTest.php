@@ -2,7 +2,7 @@
 
 namespace Tests\Browser\TaskController;
 
-use App\Domain\Task\TaskStatus;
+use App\Domain\Task\ValueObject\TaskStatus;
 use App\Models\Task;
 use Laravel\Dusk\Browser;
 use PHPUnit\Framework\Attributes\Test;
