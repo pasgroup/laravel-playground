@@ -22,7 +22,7 @@ class DeleteTaskUseCaseTest extends TestCase
     public function itDeletesTaskAndReturnsSuccessMessage(): void
     {
         $task_uuid = '11111111-1111-1111-1111-111111111111';
-        /** @var TaskRepositoryInterface $task_repository */
+        /** @var TaskRepositoryInterface&\Mockery\MockInterface $task_repository */
         $task_repository = Mockery::mock(TaskRepositoryInterface::class);
         $task_repository->shouldReceive('deleteTaskByUuid')
             ->once()
@@ -41,7 +41,7 @@ class DeleteTaskUseCaseTest extends TestCase
     {
         $this->expectException(TaskNotFoundException::class);
         $task_uuid = '00000000-0000-0000-0000-000000000000';
-        /** @var TaskRepositoryInterface $task_repository */
+        /** @var TaskRepositoryInterface&\Mockery\MockInterface $task_repository */
         $task_repository = Mockery::mock(TaskRepositoryInterface::class);
         $task_repository->shouldReceive('deleteTaskByUuid')
             ->once()

@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Domain\Task;
 
-use App\Domain\Task\TaskStatus;
-use App\Domain\Task\TaskTransition;
+use App\Domain\Task\Policy\TaskTransition;
+use App\Domain\Task\ValueObject\TaskStatus;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -21,6 +21,16 @@ class TaskTransitionTest extends TestCase
         $this->assertTrue($task_transition->canTransition(TaskStatus::NOT_STARTED, TaskStatus::NOT_STARTED));
         $this->assertTrue($task_transition->canTransition(TaskStatus::IN_PROGRESS, TaskStatus::IN_PROGRESS));
         $this->assertTrue($task_transition->canTransition(TaskStatus::COMPLETED, TaskStatus::COMPLETED));
+    }
+
+    #[Test]
+    public function itAllowsBackwardOrSkippedTransitions(): void
+    {
+        $task_transition = new TaskTransition();
+
+        $this->assertTrue($task_transition->canTransition(TaskStatus::NOT_STARTED, TaskStatus::COMPLETED));
+        $this->assertTrue($task_transition->canTransition(TaskStatus::IN_PROGRESS, TaskStatus::NOT_STARTED));
+        $this->assertTrue($task_transition->canTransition(TaskStatus::COMPLETED, TaskStatus::IN_PROGRESS));
     }
 
     #[Test]

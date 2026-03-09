@@ -2,10 +2,11 @@
 
 namespace App\Infrastructure\Persistence\Task;
 
-use App\Application\Task\DTO\TaskListItemDto;
 use App\Application\Task\Repository\TaskRepositoryInterface;
-use App\Domain\Task\TaskStatus;
+use App\Domain\Task\Entity\TaskEntity;
+use App\Domain\Task\ValueObject\TaskStatus;
 use App\Models\Task;
+use Carbon\CarbonInterface;
 
 final class EloquentTaskRepository implements TaskRepositoryInterface
 {
@@ -14,24 +15,20 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
     ) {
     }
 
-    public function createTask(
-        string $title,
-        ?string $detail,
-        ?string $due_date,
-        string $status
-    ): int {
-        $task = $this->task->newQuery()->create([
-            'title' => $title,
-            'detail' => $detail,
-            'due_date' => $due_date,
-            'status' => $status,
+    public function create(TaskEntity $task_entity): TaskEntity
+    {
+        $created_task = $this->task->newQuery()->create([
+            'title' => $task_entity->title,
+            'detail' => $task_entity->detail,
+            'due_date' => $task_entity->due_date?->toDateString(),
+            'status' => $task_entity->status,
         ]);
 
-        return (int) $task->task_id;
+        return $this->toEntity($created_task);
     }
 
     /**
-     * @return list<TaskListItemDto>
+     * @return list<TaskEntity>
      */
     public function getTaskOrderByDueDate(): array
     {
@@ -43,25 +40,15 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
             ->orderBy('task_id', 'asc')
             ->get();
 
-        return $tasks->map(
-            fn (Task $task): TaskListItemDto => new TaskListItemDto(
-                (int) $task->task_id,
-                (string) $task->task_uuid,
-                (string) $task->title,
-                $task->detail !== null ? (string) $task->detail : null,
-                $task->due_date,
-                (string) $task->status,
-                (string) $task->status_label,
-                (bool) $task->is_completed,
-                (bool) $task->is_overdue
-            )
-        )->all();
+        return $tasks
+            ->map(fn (Task $task): TaskEntity => $this->toEntity($task))
+            ->all();
     }
 
-    public function findTaskStatusByUuid(string $task_uuid): ?string
+    public function findByUuid(string $task_uuid): ?TaskEntity
     {
         $task = $this->task->newQuery()
-            ->select('status')
+            ->select('task_id', 'task_uuid', 'title', 'detail', 'due_date', 'status')
             ->where('task_uuid', $task_uuid)
             ->first();
 
@@ -69,19 +56,19 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
             return null;
         }
 
-        return (string) $task->status;
+        return $this->toEntity($task);
     }
 
     public function updateTaskStatusByUuidAndCurrentStatus(
         string $task_uuid,
-        string $current_status,
-        string $next_status
+        TaskStatus $current_status,
+        TaskStatus $next_status
     ): int {
         return $this->task->newQuery()
             ->where('task_uuid', $task_uuid)
-            ->where('status', $current_status)
+            ->where('status', $current_status->value)
             ->update([
-                'status' => $next_status,
+                'status' => $next_status->value,
             ]);
     }
 
@@ -92,5 +79,26 @@ final class EloquentTaskRepository implements TaskRepositoryInterface
             ->delete();
 
         return $deleted > 0;
+    }
+
+    private function toEntity(Task $task): TaskEntity
+    {
+        return new TaskEntity(
+            task_id: (int) $task->task_id,
+            task_uuid: (string) $task->task_uuid,
+            title: (string) $task->title,
+            detail: $task->detail !== null ? (string) $task->detail : null,
+            due_date: $this->toCarbonOrNull($task->due_date),
+            status: (string) $task->status
+        );
+    }
+
+    private function toCarbonOrNull(mixed $value): ?CarbonInterface
+    {
+        if ($value instanceof CarbonInterface) {
+            return $value;
+        }
+
+        return null;
     }
 }

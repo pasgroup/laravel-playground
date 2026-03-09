@@ -4,7 +4,7 @@ namespace Tests\Integration\Application\Task\UseCase;
 
 use App\Application\Task\DTO\CreateTaskInput;
 use App\Application\Task\UseCase\CreateTaskUseCase;
-use App\Domain\Task\TaskStatus;
+use App\Domain\Task\ValueObject\TaskStatus;
 use App\Models\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;

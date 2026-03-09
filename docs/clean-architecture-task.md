@@ -41,8 +41,9 @@
 
 - ユースケースクラス（例: CreateTaskUseCase, UpdateTaskStatusUseCase, DeleteTaskUseCase, ListTasksUseCase）
 - 入力DTO（Use Case への引数をまとめたオブジェクト）
-- UseCase の公開シグネチャ（戻り値）は **ドメインエンティティではなく専用の出力 DTO/OutputModel** とする。UseCase 内でドメイン操作後にドメイン→出力 DTO へ変換するマッパー（例: DomainToOutputMapper）を用い、Interface 層（Controller/Presenter/ViewModel）はこの出力 DTO を受け取り、表示用にさらに変換するかそのまま返却する。これによりドメインの内部構造が Interface 層に露出しない。
+- 出力DTO（`TaskCommandOutput`, `TaskListOutput`）
 - Application 層に定義したリポジトリ**インターフェース**（Port）の利用
+- 必要箇所のみ Domain Service を呼び出す（例: `TaskCreationService`, `TaskStatusDecisionService`）
 
 **含めないもの**
 
@@ -118,11 +119,19 @@
 
 ## 3. 命名・配置ルール
 
+詳細ルールは以下に分割して記載する。
+
+- [Task機能 アーキテクチャ詳細](./task-architecture/README.md)
+- [Domain 詳細](./task-architecture/domain.md)
+- [Application 詳細](./task-architecture/application.md)
+- [Infrastructure 詳細](./task-architecture/infrastructure.md)
+- [Interface 詳細](./task-architecture/interface.md)
+
 ### 3.1 ディレクトリ・名前空間
 
 | レイヤー     | 推奨パス（app 以下）                    | 名前空間例                |
 |-------------|------------------------------------------|---------------------------|
-| Domain      | `app/Domain/Task/`                       | `App\Domain\Task`         |
+| Domain      | `app/Domain/Task/`（責務別に分割）       | `App\Domain\Task\...`     |
 | Application | `app/Application/Task/`                  | `App\Application\Task`    |
 | Infrastructure | `app/Infrastructure/Persistence/Task/` | `App\Infrastructure\Persistence\Task` |
 | Interface   | `app/Http/Controllers/` 等（既存）      | `App\Http\Controllers`    |
@@ -136,8 +145,10 @@
 
 | 種類               | 命名例                          |
 |--------------------|---------------------------------|
-| ドメインエンティティ | `TaskEntity`（Domain 用。Eloquent Model との混同を避けるため、ドメインエンティティは必ず `〜Entity` サフィックスを付ける） |
-| 値オブジェクト       | `TaskStatus`, `DueDate` 等      |
+| ドメインエンティティ | `TaskEntity` |
+| 値オブジェクト       | `TaskStatus` |
+| ドメインサービス     | `TaskCreationService`, `TaskStatusDecisionService` |
+| ポリシー/仕様        | `TaskTransition`, `TaskDeadline` |
 | ユースケース         | `CreateTaskUseCase`, `ListTasksUseCase` |
 | リポジトリ Port     | `TaskRepositoryInterface`（Application 層に interface を配置） |
 | リポジトリ Adapter  | `EloquentTaskRepository`（Infrastructure の実装） |
@@ -155,21 +166,38 @@
 app/
 ├── Domain/
 │   └── Task/
-│       ├── TaskEntity.php        # ドメインエンティティ
-│       ├── TaskStatus.php        # 値オブジェクト or 定数クラス
-│       └── ...
+│       ├── Entity/
+│       │   └── TaskEntity.php
+│       ├── ValueObject/
+│       │   └── TaskStatus.php
+│       ├── Service/
+│       │   ├── TaskCreationService.php
+│       │   └── TaskStatusDecisionService.php
+│       ├── Policy/
+│       │   ├── TaskTransition.php
+│       │   └── TaskTransitionPolicyInterface.php
+│       └── Specification/
+│           └── TaskDeadline.php
 ├── Application/
 │   └── Task/
-│       ├── CreateTaskUseCase.php
-│       ├── ListTasksUseCase.php
-│       ├── UpdateTaskStatusUseCase.php
-│       ├── DeleteTaskUseCase.php
-│       └── TaskRepositoryInterface.php   # interface (Port)
+│       ├── UseCase/
+│       │   ├── CreateTaskUseCase.php
+│       │   ├── ListTasksUseCase.php
+│       │   ├── UpdateTaskStatusUseCase.php
+│       │   └── DeleteTaskUseCase.php
+│       ├── DTO/
+│       │   ├── CreateTaskInput.php
+│       │   ├── UpdateTaskStatusInput.php
+│       │   ├── DeleteTaskInput.php
+│       │   ├── TaskListOutput.php
+│       │   └── TaskCommandOutput.php
+│       └── Repository/
+│           └── TaskRepositoryInterface.php
 ├── Infrastructure/
 │   └── Persistence/
 │       └── Task/
 │           ├── EloquentTaskRepository.php
-│           └── EloquentTaskModel.php   # Eloquent Model（DB用。必要なら Domain Task と分離）
+│           └── (App\Models\Task を利用)
 ├── Http/
 │   ├── Controllers/
 │   │   └── TaskController.php
@@ -178,7 +206,7 @@ app/
 │       └── ...
 ```
 
-- 既存の `App\Models\Task` は、移行期間中は Eloquent Model として Infrastructure に相当する役割を持たせ、段階的に `Domain\Task` と `Infrastructure\Persistence\Task\EloquentTaskModel` に分離するかどうかは移行タスクで判断する
+- `App\Models\Task` は Eloquent Model（Infrastructure の永続化モデル）として扱い、UseCase から直接触らない
 
 ---
 
@@ -261,3 +289,4 @@ Task機能が Clean Architecture へ移行完了したとみなす基準を以�
 
 - Issue: [Clean Architecture導入方針の策定 #27](https://github.com/pasgroup/laravel-playground/issues/27)
 - Doc: [Task機能 データフロー図（UseCase版）](./task-usecase-data-flow.md)
+- Doc: [Task機能 アーキテクチャ詳細](./task-architecture/README.md)

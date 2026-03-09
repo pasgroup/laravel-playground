@@ -3,36 +3,31 @@
 @section('title', 'タスク一覧')
 
 @section('content')
-    @php
-        $status_not_started = \App\Domain\Task\TaskStatus::NOT_STARTED->value;
-        $status_in_progress = \App\Domain\Task\TaskStatus::IN_PROGRESS->value;
-        $status_completed = \App\Domain\Task\TaskStatus::COMPLETED->value;
-    @endphp
     <header class="task-header">
         <h1 class="task-title" dusk="index-heading">タスク一覧</h1>
         <a href="{{ route('tasks.create') }}" class="task-index-add-btn" dusk="index-create-link">新規タスク登録</a>
     </header>
 
-    @if (session('success'))
+    @if ($view_model->success_message !== null)
         <p
             class="task-flash task-flash-success"
             role="status"
             aria-live="polite"
             aria-atomic="true"
             dusk="index-flash-success"
-        >{{ session('success') }}</p>
+        >{{ $view_model->success_message }}</p>
     @endif
-    @if (session('error'))
+    @if ($view_model->error_message !== null)
         <p
             class="task-flash task-flash-error"
             role="alert"
             aria-live="assertive"
             aria-atomic="true"
             dusk="index-flash-error"
-        >{{ session('error') }}</p>
+        >{{ $view_model->error_message }}</p>
     @endif
     <h2 class="task-list-heading" dusk="index-list-heading">登録済みタスク</h2>
-    @if ($tasks->isEmpty())
+    @if (! $view_model->hasTasks())
         <p class="task-empty" dusk="index-empty-message">登録されたタスクはありません。</p>
     @else
         <div class="task-table-wrap" dusk="index-task-table-wrap">
@@ -47,14 +42,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @php $prev_task = null; @endphp
-                    @foreach ($tasks as $task)
-                        @php
-                            $is_first_completed = $prev_task !== null && $task->is_completed && ! $prev_task->is_completed;
-                        @endphp
+                    @foreach ($view_model->tasks as $task)
                         <tr dusk="index-task-row-{{ $task->task_id }}" @class([
                             'task-row-overdue' => $task->is_overdue,
-                            'task-row-first-completed' => $is_first_completed,
+                            'task-row-first-completed' => $task->is_first_completed,
                         ])>
                             <td dusk="index-task-title-{{ $task->task_id }}">{{ $task->title }}</td>
                             <td class="task-cell-muted" dusk="index-task-detail-{{ $task->task_id }}">
@@ -64,17 +55,17 @@
                                     —
                                 @endif
                             </td>
-                            <td class="task-cell-due-date" dusk="index-task-due-date-{{ $task->task_id }}">{{ $task->due_date?->format('Y-m-d') ?? '—' }}</td>
+                            <td class="task-cell-due-date" dusk="index-task-due-date-{{ $task->task_id }}">{{ $task->due_date_text }}</td>
                             <td>
                                 <form action="{{ route('tasks.status.update', ['task_uuid' => $task->task_uuid]) }}" method="post" class="task-form-inline task-status-form">
                                     @csrf
-                                    @php
-                                        $current_status_value = (string) $task->status;
-                                    @endphp
                                     <select name="status" class="task-status-select" aria-label="ステータス" onchange="this.form.submit()" dusk="index-status-select-{{ $task->task_id }}">
-                                        <option value="{{ $status_not_started }}" @selected($current_status_value === $status_not_started)>未着手</option>
-                                        <option value="{{ $status_in_progress }}" @selected($current_status_value === $status_in_progress)>進行中</option>
-                                        <option value="{{ $status_completed }}" @selected($current_status_value === $status_completed)>完了</option>
+                                        @foreach ($view_model->status_options as $status_option)
+                                            <option
+                                                value="{{ $status_option->value }}"
+                                                @selected($task->status === $status_option->value)
+                                            >{{ $status_option->label }}</option>
+                                        @endforeach
                                     </select>
                                     <button type="submit" class="task-status-submit-btn" aria-label="ステータスを更新">更新</button>
                                 </form>
@@ -87,7 +78,6 @@
                                 </form>
                             </td>
                         </tr>
-                        @php $prev_task = $task; @endphp
                     @endforeach
                 </tbody>
             </table>

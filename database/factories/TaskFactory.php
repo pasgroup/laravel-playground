@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Domain\Task\TaskStatus;
+use App\Domain\Task\ValueObject\TaskStatus;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;

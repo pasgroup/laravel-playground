@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Models\Task;
 
-use App\Domain\Task\TaskStatus;
+use App\Domain\Task\ValueObject\TaskStatus;
 use App\Models\Task;
 use Carbon\Carbon;
 use PHPUnit\Framework\Attributes\DataProvider;

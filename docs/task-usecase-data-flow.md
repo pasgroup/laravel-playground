@@ -15,11 +15,14 @@ flowchart LR
     Controller["TaskController"]
     Input["Input DTO\n(Create/Update/Delete)"]
     UseCase["UseCase\n(Create/List/Update/Delete)"]
-    Domain["Domain Rule\n(TaskStatus/TaskTransition/TaskDeadline)"]
+    Domain["Domain\n(Entity/ValueObject/Service/Policy/Specification)"]
     Port["Repository Interface\n(TaskRepositoryInterface)"]
     DI["Service Container\n(AppServiceProvider bind)"]
     Repo["Infrastructure\n(EloquentTaskRepository)"]
     Model["Eloquent Model\n(App\\Models\\Task)"]
+    Presenter["Presenter/Formatter\n(TaskIndexPresenter/TaskIndexItemFormatter)"]
+    ViewModel["ViewModel\n(TaskIndexViewModel)"]
+    View["View\n(resources/views/tasks/index.blade.php)"]
     Output["Output DTO\n(TaskListOutput/TaskCommandOutput)"]
     Response["Redirect / View"]
 
@@ -29,7 +32,12 @@ flowchart LR
     UseCase --> Port
     Port -. resolve .-> DI --> Repo --> Model
     UseCase --> Output
-    Output --> Controller --> Response --> Client
+    Output --> Controller
+    Controller <--> Presenter
+    Presenter --> ViewModel
+    Controller --> View
+    ViewModel --> View
+    View --> Response --> Client
 ```
 
 ---
@@ -41,22 +49,28 @@ sequenceDiagram
     actor U as User
     participant C as TaskController@index
     participant LU as ListTasksUseCase
-    participant R as TaskRepositoryInterface
+    participant Repo as TaskRepositoryInterface
     participant ER as EloquentTaskRepository
     participant T as Task(Model)
+    participant P as TaskIndexPresenter
+    participant F as TaskIndexItemFormatter
     participant V as tasks.index(view)
 
     U->>C: GET /
     C->>LU: handle()
-    LU->>R: getTaskOrderByDueDate()
-    R->>ER: 実装呼び出し
+    LU->>Repo: getTaskOrderByDueDate()
+    Repo->>ER: 実装呼び出し
     ER->>T: クエリ実行
     T-->>ER: Eloquent records
-    ER-->>R: list<TaskListItemDto>
-    R-->>LU: list<TaskListItemDto>
+    ER-->>Repo: list<TaskEntity>
+    Repo-->>LU: list<TaskEntity>
     LU-->>C: TaskListOutput
-    C->>C: collect(output.tasks)
-    C->>V: tasks, success_message を渡す
+    C->>C: success = session('success')\nerror = session('error')
+    C->>P: present(output, success, error)
+    P->>F: toViewModel(task, previous_task)
+    F-->>P: TaskIndexItemViewModel
+    P-->>C: TaskIndexViewModel
+    C->>V: view_model を渡す
     V-->>U: HTML
 ```
 
@@ -71,6 +85,7 @@ sequenceDiagram
     participant C as TaskController@store
     participant D as CreateTaskInput
     participant CU as CreateTaskUseCase
+    participant S as TaskCreationService(Domain)
     participant Repo as TaskRepositoryInterface
     participant ER as EloquentTaskRepository
     participant T as Task(Model)
@@ -79,12 +94,14 @@ sequenceDiagram
     Req-->>C: validated(title, detail, due_date)
     C->>D: Input DTO生成
     C->>CU: handle(input)
-    CU->>Repo: createTask(...)
+    CU->>S: createForNewTask(...)
+    S-->>CU: TaskEntity
+    CU->>Repo: create(task_entity)
     Repo->>ER: 実装呼び出し
     ER->>T: create(...)
-    T-->>ER: created task_id
-    ER-->>Repo: task_id
-    Repo-->>CU: task_id
+    T-->>ER: created model
+    ER-->>Repo: TaskEntity(task_id含む)
+    Repo-->>CU: TaskEntity
     CU-->>C: TaskCommandOutput(success, task_id)
     C-->>U: redirect(tasks.index) + flash success
 ```
@@ -100,7 +117,7 @@ sequenceDiagram
     participant C as TaskController@updateStatus
     participant D as UpdateTaskStatusInput
     participant UU as UpdateTaskStatusUseCase
-    participant TT as TaskTransition(Domain)
+    participant DS as TaskStatusDecisionService(Domain)
     participant Repo as TaskRepositoryInterface
     participant ER as EloquentTaskRepository
     participant T as Task(Model)
@@ -109,13 +126,13 @@ sequenceDiagram
     Req-->>C: validated(task_uuid, status)
     C->>D: Input DTO生成
     C->>UU: handle(input)
-    UU->>Repo: findTaskStatusByUuid(task_uuid)
+    UU->>Repo: findByUuid(task_uuid)
     Repo->>ER: 実装呼び出し
-    ER->>T: status取得
-    T-->>ER: current_status|null
-    ER-->>Repo: current_status|null
-    Repo-->>UU: current_status|null
-    UU->>TT: canTransition(current_status, next_status)
+    ER->>T: レコード取得
+    T-->>ER: model|null
+    ER-->>Repo: TaskEntity|null
+    Repo-->>UU: TaskEntity|null
+    UU->>DS: resolveTransition(current_status, next_status)
     alt 遷移可
         UU->>Repo: updateTaskStatusByUuidAndCurrentStatus(...)
         Repo->>ER: 実装呼び出し
