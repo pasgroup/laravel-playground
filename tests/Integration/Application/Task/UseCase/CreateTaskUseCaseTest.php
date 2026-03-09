@@ -18,14 +18,17 @@ class CreateTaskUseCaseTest extends TestCase
     public function itCreatesTaskWithExpectedStatus(): void
     {
         $use_case = new CreateTaskUseCase(new Task());
-        $use_case->handle(
+        $output = $use_case->handle(
             new CreateTaskInput(
                 '統合テスト_作成',
                 '統合テスト詳細',
                 '2026-04-01'
             )
         );
+        $created_task = Task::query()->where('task_id', $output->task_id)->first();
 
+        $this->assertNotNull($output->task_id);
+        $this->assertNotNull($created_task);
         $this->assertDatabaseHas('tasks', [
             'title' => '統合テスト_作成',
             'status' => TaskStatus::NOT_STARTED->value,

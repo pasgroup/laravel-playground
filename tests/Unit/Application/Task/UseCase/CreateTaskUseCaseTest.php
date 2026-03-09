@@ -21,6 +21,9 @@ class CreateTaskUseCaseTest extends TestCase
     #[Test]
     public function itCreatesTaskAndReturnsSuccessMessage(): void
     {
+        $created_task = new Task();
+        $created_task->task_id = 123;
+
         $builder = Mockery::mock();
         $builder->shouldReceive('create')
             ->once()
@@ -29,7 +32,8 @@ class CreateTaskUseCaseTest extends TestCase
                 'detail' => '詳細',
                 'due_date' => '2026-03-31',
                 'status' => TaskStatus::NOT_STARTED->value,
-            ]);
+            ])
+            ->andReturn($created_task);
 
         /** @var Task $task */
         $task = Mockery::mock(Task::class)->makePartial();
@@ -48,5 +52,6 @@ class CreateTaskUseCaseTest extends TestCase
 
         $this->assertSame('success', $output->flash_type);
         $this->assertSame('タスクを登録しました。', $output->flash_message);
+        $this->assertSame(123, $output->task_id);
     }
 }

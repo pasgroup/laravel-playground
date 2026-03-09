@@ -6,7 +6,8 @@ final class TaskCommandOutput
 {
     public function __construct(
         public string $flash_type,
-        public string $flash_message
+        public string $flash_message,
+        public ?int $task_id = null
     ) {
     }
 }

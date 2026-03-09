@@ -25,7 +25,8 @@ final class UpdateTaskStatusUseCase
     public function handle(UpdateTaskStatusInput $input): TaskCommandOutput
     {
         $next_status = TaskStatus::from($input->status);
-        $current_task = $this->task->newQuery()
+        $task_query = $this->task->newQuery();
+        $current_task = $task_query
             ->select('task_id', 'status')
             ->where('task_uuid', $input->task_uuid)
             ->first();
@@ -40,12 +41,26 @@ final class UpdateTaskStatusUseCase
             throw new InvalidTaskStatusTransitionException();
         }
 
-        $updated = $this->task->updateStatusByUuid(
-            $input->task_uuid,
-            $next_status->value
-        );
+        $updated = $this->task->newQuery()
+            ->where('task_uuid', $input->task_uuid)
+            ->where('status', $current_status->value)
+            ->update([
+                'status' => $next_status->value,
+            ]);
 
-        if (! $updated) {
+        if ($updated === 0) {
+            $task_exists = $this->task->newQuery()
+                ->where('task_uuid', $input->task_uuid)
+                ->exists();
+
+            if (! $task_exists) {
+                throw new TaskNotFoundException();
+            }
+
+            throw new InvalidTaskStatusTransitionException();
+        }
+
+        if ($updated !== 1) {
             throw new TaskNotFoundException();
         }
 

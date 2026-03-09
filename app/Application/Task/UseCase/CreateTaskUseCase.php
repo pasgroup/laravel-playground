@@ -16,13 +16,13 @@ final class CreateTaskUseCase
 
     public function handle(CreateTaskInput $input): TaskCommandOutput
     {
-        $this->task->newQuery()->create([
+        $task = $this->task->newQuery()->create([
             'title' => $input->title,
             'detail' => $input->detail,
             'due_date' => $input->due_date,
             'status' => TaskStatus::NOT_STARTED->value,
         ]);
 
-        return new TaskCommandOutput('success', 'タスクを登録しました。');
+        return new TaskCommandOutput('success', 'タスクを登録しました。', $task->task_id);
     }
 }
