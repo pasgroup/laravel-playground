@@ -56,19 +56,17 @@ final class UpdateTaskStatusUseCase
             ]);
 
         if ($updated === 0) {
-            $task_exists = $this->task->newQuery()
-                ->where('task_uuid', $input->task_uuid)
-                ->exists();
-
-            if (! $task_exists) {
-                throw new TaskNotFoundException();
-            }
-
             $latest = $this->task->newQuery()
                 ->select('status')
                 ->where('task_uuid', $input->task_uuid)
                 ->first();
-            $latest_status = $latest !== null ? TaskStatus::tryFrom((string) $latest->status) : null;
+
+            if ($latest === null) {
+                throw new TaskNotFoundException();
+            }
+
+            $latest_status = TaskStatus::tryFrom((string) $latest->status);
+
             if ($latest_status === $next_status) {
                 return new TaskCommandOutput('success', 'タスクのステータスを更新しました。');
             }
