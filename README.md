@@ -47,22 +47,19 @@ herd php artisan migrate
 
 ### このブランチで検証しているものをここに記載
 
-- **ブランチ名**: master
+- **ブランチ名**: pull_request_merge_pattern_master
 - **検証ツール**:
-  - [CodeRabbit](https://www.coderabbit.ai/ja)
-    - コードレビューの自動化
-    - サンプル（[タスクのステータス変更操作と一覧への反映を実装する #19](https://github.com/pasgroup/laravel-playground/pull/22)）
-      - 重要な指摘は該当のコードへのコメント（修正案まで出してくれる）
-      - 細かなアドバイスについては、コメントのNitpick commentsを開くと見られる
-  - [Codecov](https://app.codecov.io/gh/pasgroup/laravel-playground/)
-    - カバレッジ表示
-    - Github actions でテストを実行して反映させている
-    - パーセンテージも検証しているので、Github actions の実行時に規程を下回った場合に、actionを失敗させたりもできる
-    - ブランチごとにカバレッジの確認が可能
+  - GitHub
+    - それぞれのマージ方法をテスト
 
-- **採用・検証中のアーキテクチャ**: 
-  - 基本的なMVC（ここからブランチを切って、他のアーキテクチャを検証しやすくするため）
-  - テストコードなどは現在のルールを踏襲
+    | マージ方法 | masterに残る形 | 履歴の見やすさ |
+    | ---------- | ------------- | ------------ |
+    | Create a merge commit | PR内コミット全部 + マージコミット | 普通 |
+    | Squash and merge | 1コミットにまとめる | かなり見やすい |
+    | Rebase and merge | PR内コミットを個別に直列で残す | コミットが綺麗なら見やすい |
+
+- **採用・検証中のアーキテクチャ**:
+  - 特になし
 
 
 ---
